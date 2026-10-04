@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Simulados · Provão Paulista</title>
+<meta name="robots" content="noindex,nofollow">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#eef3fb;--card:#fff;--fg:#0f1d3a;--mut:#5b6b88;--line:#dbe4f3;--pri:#1d4ed8;--pri2:#2563eb;--ok:#047857;--okbg:#d1fae5;--bad:#b91c1c;--badbg:#fee2e2;--soft:#eff4ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -46,6 +47,23 @@ tr.gab td,tfoot td{background:var(--soft);font-weight:700;font-size:12px}.tot{fo
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0f1d3a;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90vw}#toast.on{opacity:1}
 @media(max-width:560px){.bar span:first-child{width:110px}}
+/* ---------- tela de acesso (login / primeiro acesso) ---------- */
+body.auth-on{background:radial-gradient(1100px 600px at 8% -10%,#3b82f6 0,transparent 60%),radial-gradient(900px 520px at 100% 110%,#1e3a8a 0,transparent 55%),linear-gradient(135deg,#0b1b4d,#1d4ed8);background-attachment:fixed;min-height:100vh}
+body.auth-on main{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:32px 28px 26px;box-shadow:0 28px 70px #0007;display:flex;flex-direction:column;gap:12px}
+.auth .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1e3a8a,#2563eb);display:grid;place-items:center;font-size:30px;margin:0 auto 2px;box-shadow:0 10px 24px #2563eb66}
+.auth h2{text-align:center;font-size:22px;margin:0;color:var(--fg)}
+.auth p{text-align:center;margin:0 0 4px;font-size:14px}
+.auth .f{display:flex;flex-direction:column;gap:5px}.auth .f>span{font-size:13px;font-weight:600;color:var(--mut)}
+.auth input{width:100%;padding:12px;font-size:15px}
+.auth .pw{position:relative}.auth .pw input{padding-right:46px}
+.auth .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;color:var(--mut);padding:7px 10px;font-size:16px}
+.auth button.go{padding:13px;font-size:15px;margin-top:6px;background:linear-gradient(135deg,#1d4ed8,#2563eb);box-shadow:0 8px 18px #2563eb44}
+.auth button:disabled{opacity:.6;cursor:wait}
+.auth .foot{text-align:center;font-size:12px;color:var(--mut);margin-top:4px}
+.spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--pri2);border-radius:50%;margin:6px auto;animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+
 </style>
 </head>
 <body>
@@ -53,7 +71,7 @@ tr.gab td,tfoot td{background:var(--soft);font-weight:700;font-size:12px}.tot{fo
  <div class="top"><h1>🎓 Simulados · Provão Paulista<small>Ensino Médio · correção por sala e descritor</small></h1><span id="who"></span>
   <span id="bk"><button class="hbtn" onclick="backup()">⬇ Backup</button>
   <label class="hbtn" style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px">⬆ Restaurar<input type="file" accept=".json" hidden onchange="restaurar(this)"></label></span>
-  <button class="hbtn" onclick="sair()">Sair</button></div>
+  <button class="hbtn" onclick="sair()" title="Encerrar a sessão neste navegador">🚪 Sair</button></div>
  <nav class="nav" id="nav"></nav>
 </header>
 <main id="main"></main>
@@ -63,7 +81,7 @@ tr.gab td,tfoot td{background:var(--soft);font-weight:700;font-size:12px}.tot{fo
 const SUPABASE_URL = 'https://dmhdvzzylxjietbszmjp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_T3TTEf1MFUjwGad7B12AkA_H0NIXxyz';
 let supabase = null;
-const supaPronto = import('@supabase/supabase-js').then(m=>{ supabase = m.createClient(SUPABASE_URL, SUPABASE_KEY); window.supabase = supabase; }).catch(e=>console.log('Supabase indisponível', e));
+const supaPronto = import('@supabase/supabase-js').then(m=>{ supabase = m.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}); }).catch(e=>console.log('Supabase indisponível', e));
 const KEY="simulados_v1",$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const SER={"1EM":"1ª EM","2EM":"2ª EM","3EM":"3ª EM"},MAT=["Português","Matemática","Biologia","Química","Física","Geografia","História","Inglês","Educação Financeira"];
@@ -73,6 +91,7 @@ const TABS={alunos:"👥 Cadastrar alunos",simulados:"📝 Cadastrar simulado",n
 // Simulado do PDF "Simulado Provão Paulista 2026 · 1ª série · 1º dia" (48 questões). O PDF não traz gabarito: fica pendente.
 function seedSim(){const g=[];[["Português",18],["Inglês",6],["Física",8],["Química",8],["Biologia",8]].forEach(([m,n])=>{for(let i=0;i<n;i++)g.push({c:"",d:"",m})});
  return{id:uid(),titulo:"Simulado Provão Paulista 2026 · 1ª série · 1º dia",serie:"1EM",materia:"Várias matérias",data:"",gab:g}}
+let localNovo=true;try{localNovo=!localStorage.getItem(KEY)}catch(e){}
 let S=null;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 S=Object.assign({salas:[],alunos:[],simulados:[],resp:{},users:[],desc:{},seeded:false},S||{});
 if(!S.desc["Educação Financeira"])S.desc["Educação Financeira"]=[["EF01","Juros"],["EF02","Orçamento"],["EF03","Dívidas"],["EF04","Investimentos"]];
@@ -80,15 +99,31 @@ if(!S.seeded){if(!S.simulados.length)S.simulados.push(seedSim());S.seeded=true}
 /* Turmas pré-carregadas: importadas uma única vez (não duplica e não recria alunos que você excluir). Formato: [nº chamada, nome, RA, dígito] */
 const ROSTER=[{sala:"1ª EM A",serie:"1EM",alunos:[["3","ATANAEL FELIPPE PEREIRA DA SILVA","000111792310","1"],["4","BRAYAN NERI DA SILVA","000113296330","8"],["5","EMANUELLA VITORIA DA SILVA FERREIRA","000112595603","3"],["6","ERIK MIGUEL DE MELO SILVA","000113324542","0"],["7","JESSICA LORIE MENEZES DOS SANTOS","000116306215","7"],["8","JULIA HELOISA CASTRO JESUS","000111885106","7"],["9","KARLA SOFYA DE SOUSA","000124314909","7"],["10","LUCAS CLAUDIO VIEIRA","000114064189","X"],["13","RAPHAEL GONÇALVES DOS SANTOS","000110407079","0"],["15","VICTOR EMERSON DA SILVA SANTOS PAZ","000114597506","9"],["16","VICTOR LUZ MEDRADO","000113266083","X"],["17","VITORIA SANTOS SANTANA","000114655717","6"],["19","JOSE FERNANDO CARVALHO CAVALCANTI","000112733518","2"],["24","ASHILLEY OLIVEIRA DOS SANTOS","000111711456","9"],["29","MIKAELLY VITORIA SILVA SOUZA","000112599713","8"],["34","FLÁVIO GONÇALVES DE MAGALHÃES SILVA","000111675461","7"],["37","CHARLES ANJOS SANTOS","000125723582","5"],["38","CHIRLE ANJOS SANTOS","000126349135","2"],["39","GUSTAVO EZEQUIEL FERNANDES JESUS","000111861836","1"],["43","LUIS OTAVIO FERREIRA DA SILVA","000112539929","6"],["44","PIETRA DE SOUSA RODRIGUES","000113516602","X"],["45","HIGOR GABRIEL VICENTE DA SILVA","000112859717","2"],["47","ARISSA ESTER PEREIRA DA SILVA","000113493118","9"],["52","LUANA SILVA DE SOUSA","000115708039","X"],["53","THALYS VINICIUS COSTA NERIS","000126111041","9"],["54","RAFAELA FERNANDES MARINGOLO","000111777178","7"],["55","JUAN VIANA DA HORA","000112472674","3"],["58","PEDRO HENRIQUE ALMEIDA DE SOUZA","000113306289","1"],["60","VITORIA FERNANDES FARIAS","000115335593","0"],["61","MICKAELLY SILVA LEITE PEREIRA","000112614524","5"],["62","ROONEY LUIS OLIVEIRA SILVA","000112596797","3"],["63","GUILHERME AUGUSTO NOVAIS DE ALMEIDA","000110374652","2"],["64","PEDRO HENRIQUE VIEIRA GONZAGA","000114041005","2"],["66","PEDRO HENRIQUE DA SILVA FERREIRA","000112544386","8"],["67","ANA CLARA ALVES DOS SANTOS BARROS","000111825088","6"],["70","GIULIANO ANDRADE ARAUJO","000113959635","4"],["71","ROBSON LUCIANO MORAIS ANTUNES","000112791784","5"],["72","DAVI LUIZ NEVES LOPES","000112568158","5"],["73","FELIPE VIEIRA SOUSA DO NASCIMENTO","000113348443","8"],["33","GABRIEL DE SANTANA SANTOS PEREIRA","000113241389","8"],["2","ANDRESSA PIMENTEL SANTANA","000125907458","4"],["11","MYRELLA DAMIAO DOS SANTOS","000111675395","9"],["18","MARIA KAROLINE XAVIER SILVA","000125649907","9"],["20","MARYANE ALMEIDA SANTOS SILVA","000111675372","8"],["21","PEDRO DA CONCEICAO RODRIGUES CORREIA","000111771695","8"],["25","SARA CRISTINA DA SILVA","000113313662","X"],["26","NICOLAS CORREA DA SILVA","000110877419","2"],["30","ANA LUIZA AMORIM DE OLIVEIRA","000113284269","4"],["32","DENNYS WALLACE SANTOS DO NASCIMENTO","000113020076","0"],["35","NATALIA DANTAS DO VALE","000111691694","0"],["36","LUIS OTAVIO NERES DA SILVA SOUSA","000109477815","1"],["41","MYRELLY SILVA SANTOS","000111861940","7"],["49","ICARO FERREIRA DA SILVA","000111741309","3"],["51","GABRIELLY ALVES DA ROCHA DE SOUZA","000113180449","1"],["56","WALLAS ADRIEL SANTOS SILVA","000115031735","8"],["1","ANA CRISTINA TAVARES DIAS","000113767225","0"],["12","RAFAELA FERREIRA","000111829156","6"],["14","THIAGO PEREIRA COELHO","000112755225","9"],["22","ISABELLY ALVES DE OLIVEIRA","000111742989","1"],["23","MURILO FERRAZ ROCHA","000111691445","1"],["27","NICOLLY CRUZ FELIX","000114736356","0"],["28","MAVILA YASMIN DE LAVOR","000113483816","5"],["31","NICOLLY RAMALHO DO NASCIMENTO","000112202967","6"],["40","CARLOS EDUARDO SOUZA BUENO","000111725890","7"],["42","ALANA RODRIGUES DE OLIVEIRA","000111829998","X"],["46","EDINSON JESUS MIQUILENA AROCHA","000126144656","2"],["48","YASMIN NEGOZEKI CAVALCANTI","000110398986","8"],["50","MELISSA SOUZA ROMÃO","000111472793","3"],["57","EVILLYN NOGUEIRA JACINTO","000112824800","1"],["59","CARLOS HENRIQUE ROCHA DE OLIVEIRA","000111691599","6"],["65","ENZO DE MELO MAGALHAES","000112619625","3"],["68","THAYLA VITORIA FERNANDES DA SILVA","000112679200","7"],["69","JOÃO VICTOR AGUIAR DA SILVA","000113608653","5"],["43","NAYARA DOMINGUES CANDIDO","000113273233","5"]]},{"sala":"1ª EM B","serie":"1EM","alunos":[["1","ALEXANDRE ALONSO SILVA","000115498803","X"],["10","FLAVIA GABRIELA SOARES DA SILVA","000114988351","0"],["14","JOSE CARLOS BOAVENTURA JUNIOR","000111784846","2"],["17","LUANA OLIVEIRA DA SILVA","000111829802","0"],["18","LUANA VITORIA BALBINO DA SILVA","000113519623","0"],["19","LUCAS ANTONIO BARAUNA DOS SANTOS","000111690395","7"],["21","LUIZ GUSTAVO ARAUJO DA SILVA DIONISIO","000115800686","X"],["22","MARCOS VINICIUS RODRIGUES DA SILVA","000111830739","2"],["23","MARIA EDUARDA SANTANA DA SILVA BEZERRA","000113492304","1"],["24","MARIA ELOYSE DE QUEIROZ SILVA","000114727834","9"],["25","MATHEUS HENRIQUE DA SILVA SANTOS","000115360542","9"],["26","MIGUEL COSTA DA SILVA","000113538894","5"],["27","NICOLAS MATOS ALVARENGA","000113303581","4"],["28","RAFAEL AMORIM CAVALCANTI","000111829714","3"],["29","RAPHAEL ALMEIDA DE AQUINO","000114374742","2"],["31","RYANNA VITORIA SILVA DE ARAUJO","000113306336","6"],["35","WILLIAN DE JESUS FRANÇA","000111830602","8"],["37","YURI DOS ANJOS LIMA","000112326288","3"],["38","MIKAEL LIMA CAMPOS DE SOUSA","000111881179","3"],["40","WRIELLY KELLY MIRANDA DA SILVA","000114067669","6"],["41","NICOLLY DA SILVA GELAIN","000112985047","X"],["44","EMILLY VITORIA DE SOUSA","000113451338","0"],["45","ANA VIVIAN DE OLIVEIRA SILVA","000114966402","2"],["46","ARTHUR ALBUQUERQUE SILVA","000115388189","5"],["47","CAMILA DE OLIVEIRA MIQUELAN","000114513435","X"],["48","MIGUEL DE JESUS","000113286862","2"],["51","NATHALY ISABELA PEREIRA GUEDES","000110314762","6"],["53","MARIA EDUARDA PEREIRA BELEM","000113472986","8"],["57","RICHARD KAUAN FERREIRA DA CRUZ","000114570630","7"],["58","LUCAS EDUARDO DA SILVA RAMIRO","000113177023","7"],["60","JOSE GUILHERME DOS SANTOS FRANÇA","000114366670","7"],["61","MATEUS DE ANDRADE CORREIA","000114926251","5"],["63","MIGUEL CARLETO DA CONCEIÇÃO","000111788308","5"],["65","ADRIELE SILVA SANTOS","000115115402","7"],["66","KEVIN GONÇALVES NOGUEIRA NUNES","000110374837","3"],["67","ISABELLY VITÓRIA MONTEIRO DE LIMA","000126661470","9"],["69","KLEBER FERREIRA AMURIM","000113487268","9"],["70","LETICIA FERREIRA CRUZ","000111752897","2"],["71","MILENA DA SILVA SANTOS","000112821787","9"]]},{"sala":"1ª EM C","serie":"1EM","alunos":[["3","ANDRESSA PEREIRA CAMPELO DA SILVA","000114127816","9"],["5","EDUARDO GASTÃO GUIDI","000113035190","7"],["13","LUIS FERNANDO MESSIAS BORGES","000113303825","6"],["14","MARIA LUIZA RIBEIRO DA SILVA FERREIRA","000112590151","2"],["17","THIFANY PINHEIRO FROZ","000112791786","9"],["21","GABRIEL GARCIA DA SILVA","000112579187","1"],["22","ADRIELLE FERNANDA RAMOS SILVA","000110369954","4"],["27","ANA JULIA FERREIRA DOS SANTOS","000115458257","7"],["32","GUSTAVO FELIX DOS SANTOS","000111824325","0"],["33","YAINNELYS DEL VALLE GIL ACIVES","000123294125","6"],["36","CARLOS EDUARDO OLIVEIRA AMORIM","000113287846","9"],["37","LARISSA SOUZA DA SILVA","000113266125","0"],["41","VINICIUS ARAUJO DA COSTA SILVA","000112580444","0"],["44","GUILHERME WILLIAN OLIVEIRA DE SOUZA","000111829840","8"],["45","SARA VITÓRIA CARDOSO CORQUIOLA","000126452437","7"],["46","VITORIA SABRINA RODRIGUES DA PAIXAO","000115976936","9"],["47","ADRIEL SILVA SANTOS","000121986088","8"],["49","RAYANNE VITORIA CAPPABIANCA SIQUEIRA","000111885562","0"],["50","RENATA FERREIRA VILARES DE OLIVEIRA","000113149087","3"],["53","IAGO FERREIRA DA SILVA","000111741319","6"],["55","FELIPE DANIEL LUCAS MARIANO","000114053887","1"],["57","ALLAN GOULAR DOS SANTOS","000113286366","1"],["58","ANA CLARA NASCIMENTO FERREIRA","000113490008","9"],["59","MIRELLY CRISTINA MAXIMO ALVAREZ","000114351323","X"],["60","KEVIN WILLIAM VIEIRA DA SILVA","000115729479","0"],["61","THAUANA CRUZ DOS SANTOS","000113496089","X"],["62","JHONNY DOS SANTOS DE OLIVEIRA","000113500936","3"],["70","VICTOR HUGO FERNANDES GUIMARAES","000113520772","0"],["74","LUIZ HENRIQUE NASCIMENTO MACHADO","000113485425","0"],["77","EDUARDO VALERIO RODRIGUES DIAS","000113502124","7"],["78","LEONARDO GABRIEL SOARES MONTEIRO","000115090788","5"],["79","THAYNA LORRANY SANTOS DE SOUZA","000115514928","2"],["80","GABRIEL OLIVEIRA GOMES","000113622860","3"],["81","JULIA RAFAELA APARECIDA DE ASSIS DIAS","000113298991","7"],["82","GUILHERME ANTONIO DO CARMO MARTINS MESSIAS","000115026961","3"],["83","GUSTAVO SOARES SILVA","000113506966","9"],["84","ISAQUE NATHAN SANTOS GERMANO","000111725728","9"],["85","PEDRO HENRIQUE DA CRUZ NOBES","000110371985","3"],["86","VINICIOS ANTONIO ANGELO DE OLIVEIRA","000111839759","9"],["87","LUCAS DIAS","000113029674","X"]]},{"sala":"2ª EM B","serie":"2EM","alunos":[["10","KETHELLYN YASMYM VIEIRA DE SOUZA","000110372036","3"],["11","KHEROLLYN RAQUELY DE SOUZA","000112569859","7"],["15","RAKELLY DA SILVA","000125255596","9"],["21","BIANCA ARAUJO DA SILVA","000109206085","6"],["27","MYRELLA EVYLLIM RIBEIRO DA SILVA","000126337432","3"],["30","ANA LUIZA RUBIA DE FRANÇA","000110409551","8"],["34","HUGO VINICIUS DA SILVA PAP","000111741379","2"],["37","JULIA HENRIQUES DA SILVA","000112353007","5"],["40","KANHANY FERREIRA DE OLIVEIRA BRAGA","000112595156","4"],["47","GABRIELLA SANTOS BATISTA","000111839767","8"],["48","YAGO VINICIOS SANTOS MOREIRA","000111824534","9"],["51","ANE MARCELY MARIN DE SOUZA","000114351173","6"],["54","BEATRIZ ALVES DA SILVA","000112525579","1"],["58","YASMIN FERNANDA COSTA NIEPICUY","000111839707","1"],["62","GABRIEL MARQUES DA SILVA","000114034732","9"],["66","PEDRO HENRIQUE EDUARDO BASTOS DA CRUZ","000112360591","9"],["68","LIZ NICACIO DA SILVA","000111885689","2"],["79","MARIA EDUARDA SOUZA TEIXEIRA","000111844060","2"],["81","JULIA RIBEIRO DE ARAUJO","000113039705","1"],["82","DAFINY JULIA SANTOS DE OLIVEIRA","000113508458","0"],["83","DAVI FERREIRA DE ALMEIDA","000114916099","8"],["87","SILVIO GABRIEL JOSÉ DA SILVA","000113497361","5"],["88","BRUNA APARECIDA VIEIRA DOS SANTOS EDUARDO","000125877663","7"],["90","PATRICIA ALVES FRANÇA","000113313660","6"],["92","DIOGO SILVA PEIXOTO","000113030907","1"],["93","VITHORIA SANT'ANA CONCEIÇÃO","000111866052","3"],["95","JOÃO PEDRO RODRIGUES OLIVEIRA","000111877717","7"],["97","NEIDE ZITA NIMBI","000126709686","X"],["98","PAULO HENRIQUE ARAUJO CORREIA","000115428973","4"],["99","KAUANY FERNANDES SILVA","000111741097","3"],["100","JOAO VICTOR BARROS GOMES","000111825544","6"],["101","VITÓRIA DIAS MARTINS","000113429048","2"]]},{"sala":"2ª EM C","serie":"2EM","alunos":[["2","ANA BEATRIZ DOS SANTOS BRITO","000111689473","7"],["3","ANA CAROLINA REZENDE DE JESUS","000110399064","0"],["9","GUILHERME LENON DOS SANTOS ELIAS","000112556949","9"],["10","GUILHERME VIANA MUNCK","000115347162","0"],["16","JONATAN VINICIOS MARTINS FERREIRA","000112531888","0"],["18","KAUANY MONIQUE CRUZ DOS REIS","000111861825","7"],["34","MIRELLA FIGUEIREDO DE ARAUJO HELMER","000113489205","6"],["36","OTAVIO HENRIQUE ROSA FERREIRA","000112904317","4"],["41","SÉRGIO JUNIOR DE OLIVEIRA JOAQUIM","000109890203","8"],["44","PEDRO HENRIQUE RAMOS DE SOUSA","000111839773","3"],["45","VITORIA MARTINS DE SOUZA","000111844028","6"],["48","RALLYSON NORONHA DE SOUSA BEZERRA","000114108345","0"],["53","EVELLYN GOMES SILVA","000111690415","9"],["56","LUIZ OTÁVIO NASCIMENTO MENDES","000112600248","3"],["58","RODRIGO SANTOS CORREIA","000122760652","7"],["59","ISLANIA ALEXANDRE CAVALCANTE","000111689500","6"],["60","GABRIELA VITORIA DE ARAUJO VIEIRA","000110411679","0"],["61","HEVELYN CAMILLY TRIDICO RAMOS","000112835531","0"],["63","EVERTON HENRIQUE DE QUADROS LEAL","000112760736","4"],["64","VITOR HUGO MIRANDA DE GODOY","000111825286","X"],["66","ISABELA SILVA SANTOS DE JESUS","000115877178","2"],["67","KIARA VITORIA BARBOSA DOS SANTOS","000112589417","9"],["68","KETHELLY VITORIA RIBEIRO CARDOSO","000111742257","4"],["69","PABLO MATHEUS SANTOS AQUINO","000112560174","7"],["70","IAGO ANTONIO DA SILVA","000111825040","0"],["71","NOEMI VICTÓRYA GOMES SOARES","000110404383","X"],["72","BRENO MARCAL DE SOUZA","000110370218","X"],["74","NINA VITÓRIA DE MOURA GOMES","000111694199","5"],["75","MOACIR PETERSON PEREIRA NUNES","000111675141","0"]]},{"sala":"3ª EM A","serie":"3EM","alunos":[["2","ARIELLY FERREIRA DO COUTO","000113273346","7"],["3","DANILO RIBEIRO DA SILVA","000110070580","6"],["6","GABRIELY VIEIRA DOS SANTOS","000111839724","1"],["9","HENRIQUE ALVES ROCHA VIEIRA","000113096280","5"],["10","HIAGO RAMOS DA SILVA","000110398514","0"],["15","LAISA SILVA LOPES","000114129220","8"],["17","MARIA EDUARDA DE SOUZA SANTOS","000111667555","9"],["20","ROBERT KAUE SILVA AZEVEDO","000112482503","4"],["24","YASMIN VITORIA TEIXEIRA CORREA","000114357768","1"],["26","MICAELLE CRISTINA TRIDICO DE OLIVEIRA","000114050444","7"],["28","RENAN NUNZIO MARCONDES","000113260300","6"],["31","BRUNA NOVAIS DA SILVA","000111670375","0"],["34","GUSTAVO OLIVEIRA DOS SANTOS","000111741123","0"],["35","ALEXANDRE ANDERSON GOMES DOS SANTOS","000111861853","1"],["38","BEATRIZ MARCELINO NARCISO DOS SANTOS","000109450324","1"],["41","MARIA EDUARDA DUARTE FAGUNDES","000111668012","9"],["43","VINICIUS TOMAZ MAIA","000113102420","5"],["44","GUSTAVO GONCALVES RODRIGUES","000109483103","7"],["46","YASMIM FERREIRA DA SILVA","000110409542","7"],["47","NICOLLY REILANNE DA COSTA REIS","000125788320","3"],["48","ESTER RODRIGUES DINIZ","000110375015","X"],["49","EMERSON EDUARDO PEREIRA DA SILVA","000111887247","2"],["50","LUIZA DE LIRA STOKLEIN","000114260286","2"],["51","JULIA DE LIRA STOKLEIN","000114260258","8"],["54","ISABELLA DE SOUZA CARDOSO","000112239645","4"],["56","LUIZ FABIANO ALVES SENA DE SOUZA","000114281574","2"],["57","NATALINA CRUZ MARÇAL","000110916080","X"]]}];
 (function(){S.imp=S.imp||{};ROSTER.forEach(r=>{const k=r.sala+"|v1";if(S.imp[k])return;let sa=S.salas.find(s=>s.nome===r.sala);if(!sa){sa={id:uid(),nome:r.sala,serie:r.serie};S.salas.push(sa)}r.alunos.forEach(([num,nome,ra,dv])=>{if(!S.alunos.some(a=>a.ra===ra&&a.dv===dv))S.alunos.push({id:uid(),nome,num:String(num),ra,dv,sala:sa.id})});S.imp[k]=1})})();
-let saveTimeout=null, nuvemOk=false;
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} clearTimeout(saveTimeout); if(!nuvemOk) return; saveTimeout=setTimeout(async()=>{ try{ await supaPronto; if(!supabase) return; const {error}=await supabase.from('backup_sistema').upsert({id:1,dados:S,updated_at:new Date().toISOString()},{onConflict:'id'}); if(error) console.log(error); else console.log('Salvo no Supabase'); }catch(e){} },800)}; save();
-async function carregarDoSupabase(){ try{ await supaPronto; if(!supabase) return; const {data,error}=await supabase.from('backup_sistema').select('dados').eq('id',1).maybeSingle(); if(error){ console.log(error); return }
- const c=data&&data.dados; const n=o=>Object.keys(o||{}).length;
- if(c&&((c.alunos||[]).length>S.alunos.length||(c.simulados||[]).length>S.simulados.length||n(c.resp)>n(S.resp))){ if(confirm('Dados mais novos no Supabase. Carregar?')){ S=Object.assign(S,c); localStorage.setItem(KEY,JSON.stringify(S)); location.reload(); return } }
- nuvemOk=true; save() }catch(e){ console.log(e) } }
-carregarDoSupabase();
-const sess={u:null};try{sess.u=S.users.find(x=>x.id===sessionStorage.getItem("sim_u"))||null}catch(e){}
-const persist=()=>{try{sessionStorage.setItem("sim_u",sess.u?sess.u.id:"")}catch(e){}};
+const sess={u:null};
+let saveTimeout=null, nuvemOk=false, nuvemEstado='carregando', nuvemLinha=null, nuvemErro='';
+/* A nuvem só recebe dados depois que o sistema está configurado E há alguém logado (nuvemOk). */
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} clearTimeout(saveTimeout); if(!nuvemOk||!sess.u) return; saveTimeout=setTimeout(async()=>{ try{ await supaPronto; if(!supabase) return; const {error}=await supabase.from('backup_sistema').upsert({id:1,dados:S,updated_at:new Date().toISOString()},{onConflict:'id'}); if(error) console.log(error); }catch(e){} },800)}; save();
+/* Sessão: logado=true + id do usuário no sessionStorage (some ao fechar a aba/navegador). */
+const persist=()=>{try{if(sess.u){sessionStorage.setItem("logado","true");sessionStorage.setItem("sim_u",sess.u.id)}else{sessionStorage.removeItem("logado");sessionStorage.removeItem("sim_u")}}catch(e){}};
+/* Lê a linha id=1 de backup_sistema. Retorna {dados, updated_at} ou null (linha inexistente). Lança erro se o servidor falhar. */
+async function lerNuvem(){ await supaPronto; if(!supabase) throw new Error("Supabase indisponível");
+ const {data,error}=await supabase.from('backup_sistema').select('dados,updated_at').eq('id',1).maybeSingle(); if(error) throw error; return data||null }
+const nuvemConfigurada=l=>!!(l&&l.dados&&Array.isArray(l.dados.users)&&l.dados.users.length);
+/* A nuvem manda: usuários/senhas SEMPRE vêm do Supabase. Só mantém os dados locais se este navegador tiver mais do que a nuvem. Retorna true se manteve os locais. */
+function sincronizar(c){ const n=o=>Object.keys(o||{}).length;
+ const localMais=!localNovo&&(S.alunos.length>(c.alunos||[]).length||S.simulados.length>(c.simulados||[]).length||n(S.resp)>n(c.resp));
+ if(localMais&&confirm("Este navegador tem dados mais novos que a nuvem.\n\nOK = manter os deste navegador e enviar para a nuvem.\nCancelar = carregar os dados da nuvem.")){S.users=c.users;return true}
+ Object.assign(S,c);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return false }
+/* Primeira coisa que o sistema faz: consultar o Supabase. Decide entre: configurado (login) / vazio (primeiro acesso, uma única vez) / erro. */
+async function iniciar(){ nuvemEstado='carregando'; nuvemOk=false; render();
+ try{ const linha=await lerNuvem(); nuvemLinha=linha;
+  if(nuvemConfigurada(linha)){ const c=linha.dados; nuvemEstado='configurado';
+   let id=null,ok=false;try{id=sessionStorage.getItem("sim_u");ok=sessionStorage.getItem("logado")==="true"}catch(e){}
+   if(ok&&c.users.some(x=>x.id===id)){ const manter=sincronizar(c); sess.u=S.users.find(x=>x.id===id)||null; nuvemOk=!!sess.u; if(manter) save() }
+   else{ sess.u=null; persist() } }
+  else{ nuvemEstado='vazio'; sess.u=null; persist() }
+ }catch(e){ console.log(e); nuvemErro=[e&&e.code,e&&e.message,e&&e.hint].filter(Boolean).join(' · ')||String(e); nuvemEstado='erro'; sess.u=null }
+ render() }
 const ui={tab:"alunos"};let draft=null;
 const isC=()=>sess.u&&sess.u.cargo==="coordenador",allowed=()=>isC()?Object.keys(TABS):["res"];
 const salasOrd=()=>[...S.salas].sort((a,b)=>a.serie.localeCompare(b.serie)||a.nome.localeCompare(b.nome,"pt",{numeric:true}));
@@ -101,28 +136,71 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 function sure(b,fn){if(b.dataset.s){fn();return}b.dataset.s=1;const t=b.textContent;b.textContent="Certeza?";setTimeout(()=>{delete b.dataset.s;b.textContent=t},3000)}
 function go(t){ui.tab=t;render();scrollTo(0,0)}
 function render(){const h=$("#hdr");
- if(!sess.u){h.hidden=true;$("#main").innerHTML=S.users.length?vLogin():vSetup();return}
+ document.body.classList.toggle("auth-on",!sess.u);
+ if(!sess.u){h.hidden=true;$("#main").innerHTML=nuvemEstado==="configurado"?vLogin():nuvemEstado==="vazio"?vSetup():vAguarde();return}
  h.hidden=false;if(!allowed().includes(ui.tab))ui.tab=allowed()[0];$("#who").textContent=`👤 ${sess.u.nome} · ${sess.u.cargo}`;$("#bk").hidden=!isC();
  $("#nav").innerHTML=allowed().map(t=>`<button class="${t===ui.tab?"on":""}" onclick="go('${t}')">${TABS[t]}</button>`).join("");
  $("#main").innerHTML={alunos:vAlunos,simulados:vSim,notas:vNotas,res:vRes,acessos:vAcessos}[ui.tab]();if(ui.tab==="notas")footer()}
 
 /* ---------- acesso (login) ---------- */
-const rest=`<label class="link">ou restaurar um backup<input type="file" accept=".json" hidden onchange="restaurar(this)"></label>`;
-const vSetup=()=>`<section class="card login"><h2>🎓 Primeiro acesso</h2><p class="mut">Cadastre o coordenador responsável. Depois disso, só entra quem tiver cadastro.</p>
- <input id="u_nome" placeholder="Nome completo"><input id="u_email" type="email" placeholder="E-mail"><input id="u_s1" type="password" placeholder="Senha (mín. 8 caracteres)"><input id="u_s2" type="password" placeholder="Repita a senha"><button onclick="setup()">Criar acesso do coordenador</button>${rest}</section>`;
-const vLogin=()=>`<section class="card login"><h2>🎓 Simulados · Provão Paulista</h2><p class="mut">Acesso restrito a professores e coordenação.</p>
- <input id="l_email" type="email" placeholder="E-mail"><input id="l_s" type="password" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()"><button onclick="entrar()">Entrar</button>${rest}</section>`;
+const authShell=x=>`<section class="auth">${x}</section>`;
+const campoSenha=(id,ph,ac,enter)=>`<div class="f"><div class="pw"><input id="${id}" type="password" placeholder="${ph}" autocomplete="${ac}" ${enter?`onkeydown="if(event.key==='Enter')${enter}"`:""}><button type="button" class="eye" tabindex="-1" onclick="verSenha('${id}',this)" title="Mostrar/ocultar">👁</button></div></div>`;
+function verSenha(id,b){const i=document.getElementById(id);i.type=i.type==="password"?"text":"password";b.textContent=i.type==="password"?"👁":"🙈"}
+const vAguarde=()=>nuvemEstado==="erro"?authShell(`<div class="logo">⚠️</div><h2>Sem conexão com o servidor</h2><p class="mut">Por segurança, o acesso só é liberado depois de conferir o servidor. Verifique a internet e tente de novo.</p>${nuvemErro?`<p class="mut" style="font-size:12px;word-break:break-word">Detalhe técnico: ${esc(nuvemErro)}</p>`:""}<button class="go" onclick="iniciar()">Tentar de novo</button>`):authShell(`<div class="logo">🎓</div><h2>Conectando…</h2><p class="mut">Verificando o servidor.</p><div class="spin"></div>`);
+const vSetup=()=>authShell(`<div class="logo">🛡️</div><h2>Primeiro acesso</h2><p class="mut">Esta tela aparece <b>uma única vez</b>. Cadastre o administrador do sistema — depois disso, só entra quem tiver login.</p>
+ <div class="f"><span>Nome</span><input id="u_nome" placeholder="Nome completo" value="Administrador" autocomplete="name"></div>
+ <div class="f"><span>E-mail</span><input id="u_email" type="email" placeholder="E-mail" value="admin@admin.com" autocomplete="username"></div>
+ <div class="f"><span>Senha</span></div>${campoSenha("u_s1","Mínimo 8 caracteres","new-password")}
+ <div class="f"><span>Repita a senha</span></div>${campoSenha("u_s2","Repita a senha","new-password","setup()")}
+ <button class="go" id="btnAuth" onclick="setup()">Criar administrador</button>`);
+const vLogin=()=>authShell(`<div class="logo">🎓</div><h2>Simulados · Provão Paulista</h2><p class="mut">Acesso restrito. Entre com seu e-mail e senha.</p>
+ <div class="f"><span>E-mail</span><input id="l_email" type="email" placeholder="seu@email.com" autocomplete="username" onkeydown="if(event.key==='Enter')$('#l_s').focus()"></div>
+ <div class="f"><span>Senha</span></div>${campoSenha("l_s","Sua senha","current-password","entrar()")}
+ <button class="go" id="btnAuth" onclick="entrar()">Entrar</button>
+ <div class="foot">Ensino Médio · correção por sala e descritor</div>`);
 async function hash(p,salt){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(salt+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 async function mkUser(nome,email,senha,cargo,salas){nome=nome.trim();email=email.trim().toLowerCase();
  if(!nome||!/^\S+@\S+\.\S+$/.test(email))return"Informe nome e e-mail válidos";if(senha.length<8)return"A senha precisa ter ao menos 8 caracteres";
  if(S.users.some(u=>u.email===email))return"E-mail já cadastrado";if(!window.crypto||!crypto.subtle)return"Este navegador não suporta criptografia de senha";
  const salt=uid()+uid();S.users.push({id:uid(),nome,email,cargo,salas:salas||[],salt,hash:await hash(senha,salt)});save();return""}
-async function setup(){if($("#u_s1").value!==$("#u_s2").value)return toast("As senhas não conferem");
- const e=await mkUser($("#u_nome").value,$("#u_email").value,$("#u_s1").value,"coordenador");if(e)return toast(e);sess.u=S.users[S.users.length-1];persist();ui.tab="alunos";render()}
-async function entrar(){const u=S.users.find(x=>x.email===$("#l_email").value.trim().toLowerCase());
- if(!u||await hash($("#l_s").value,u.salt)!==u.hash)return toast("E-mail ou senha inválidos");sess.u=u;persist();ui.tab="alunos";render()}
-function sair(){sess.u=null;persist();render()}
-function vAcessos(){return `<section class="card"><h2>Cadastrar professor ou coordenador</h2><div class="grid"><input id="n_nome" placeholder="Nome"><input id="n_email" type="email" placeholder="E-mail"><input id="n_s" type="password" placeholder="Senha (mín. 8)"><select id="n_c" onchange="$('#n_salas').hidden=this.value!=='professor'"><option value="professor">Professor</option><option value="coordenador">Coordenador</option></select></div>
+async function setup(){ if(nuvemEstado!=="vazio") return;
+ if($("#u_s1").value!==$("#u_s2").value) return toast("As senhas não conferem");
+ const b=$("#btnAuth");b.disabled=true;
+ const e=await mkUser($("#u_nome").value,$("#u_email").value,$("#u_s1").value,"coordenador");
+ if(e){b.disabled=false;return toast(e)}
+ const novo=S.users[S.users.length-1],agora=new Date().toISOString();let ok=false;
+ const desfaz=()=>{S.users=S.users.filter(u=>u.id!==novo.id);save()};
+ try{ await supaPronto; if(!supabase) throw new Error("Supabase indisponível");
+  /* Trava atômica: INSERT falha se a linha id=1 já existir; se existir vazia, só atualiza se ninguém mexeu nela desde que a lemos. */
+  if(!nuvemLinha){ const {error}=await supabase.from('backup_sistema').insert({id:1,dados:S,updated_at:agora}); if(!error) ok=true; else if(error.code!=="23505") throw error }
+  else{ let q=supabase.from('backup_sistema').update({dados:S,updated_at:agora}).eq('id',1); q=nuvemLinha.updated_at==null?q.is('updated_at',null):q.eq('updated_at',nuvemLinha.updated_at);
+   const {data,error}=await q.select('id'); if(error) throw error; ok=!!(data&&data.length) }
+ }catch(err){ console.log(err); desfaz(); b.disabled=false; return toast("Não foi possível salvar no servidor. Tente de novo.") }
+ if(!ok){ desfaz(); toast("O sistema já foi configurado. Faça login."); return iniciar() }
+ sess.u=novo;nuvemEstado="configurado";nuvemOk=true;persist();ui.tab="alunos";render();toast("Administrador criado. Você já está logado.") }
+/* Login: confere e-mail e senha com o que está salvo no Supabase (não com o localStorage). */
+async function entrar(){ if(nuvemEstado!=="configurado") return;
+ const email=$("#l_email").value.trim().toLowerCase(),senha=$("#l_s").value;
+ if(!email||!senha) return toast("Informe e-mail e senha");
+ const b=$("#btnAuth");b.disabled=true;
+ try{ const linha=await lerNuvem();
+  if(!nuvemConfigurada(linha)){ b.disabled=false; return iniciar() }
+  const c=linha.dados,u=c.users.find(x=>x.email===email);
+  if(!u||!window.crypto||!crypto.subtle||await hash(senha,u.salt)!==u.hash){ b.disabled=false; return toast("E-mail ou senha inválidos") }
+  nuvemLinha=linha; const manter=sincronizar(c); sess.u=S.users.find(x=>x.id===u.id)||null;
+  if(!sess.u){ b.disabled=false; return toast("Não foi possível carregar o usuário") }
+  nuvemOk=true; if(manter) save(); persist(); ui.tab="alunos"; render()
+ }catch(err){ console.log(err); b.disabled=false; toast("Sem conexão com o servidor. Tente novamente.") } }
+function sair(){ sess.u=null; nuvemOk=false; persist(); ui.tab="alunos"; draft=null; render(); scrollTo(0,0) }
+const vConta=()=>`<section class="card"><h2>Minha conta</h2><p class="mut" style="margin:0 0 8px">Altere seu e-mail e/ou senha de acesso. Para confirmar, informe a senha atual.</p><div class="grid"><input id="c_email" type="email" value="${esc(sess.u.email)}" placeholder="E-mail"><input id="c_atual" type="password" placeholder="Senha atual" autocomplete="current-password"><input id="c_s1" type="password" placeholder="Nova senha (mín. 8) — opcional" autocomplete="new-password"><input id="c_s2" type="password" placeholder="Repita a nova senha" autocomplete="new-password"></div><div class="row"><button onclick="trocarConta()">Salvar alterações</button></div></section>`;
+async function trocarConta(){ const u=S.users.find(x=>x.id===sess.u.id); if(!u) return;
+ if(await hash($("#c_atual").value,u.salt)!==u.hash) return toast("Senha atual incorreta");
+ const email=$("#c_email").value.trim().toLowerCase(),s1=$("#c_s1").value,s2=$("#c_s2").value;
+ if(!/^\S+@\S+\.\S+$/.test(email)) return toast("E-mail inválido");
+ if(S.users.some(x=>x.id!==u.id&&x.email===email)) return toast("E-mail já cadastrado");
+ if(s1||s2){ if(s1.length<8) return toast("A nova senha precisa ter ao menos 8 caracteres"); if(s1!==s2) return toast("As novas senhas não conferem"); u.salt=uid()+uid(); u.hash=await hash(s1,u.salt) }
+ u.email=email; sess.u=u; save(); render(); toast("Conta atualizada") }
+function vAcessos(){return `${vConta()}<section class="card"><h2>Cadastrar professor ou coordenador</h2><div class="grid"><input id="n_nome" placeholder="Nome"><input id="n_email" type="email" placeholder="E-mail"><input id="n_s" type="password" placeholder="Senha (mín. 8)"><select id="n_c" onchange="$('#n_salas').hidden=this.value!=='professor'"><option value="professor">Professor</option><option value="coordenador">Coordenador</option></select></div>
  <div id="n_salas"><p class="mut" style="margin:6px 0">Salas do professor (ele só verá os resultados dessas salas):</p>${salasOrd().map(s=>`<label class="chk"><input type="checkbox" value="${s.id}">${esc(s.nome)}</label>`).join("")||`<span class="mut">Cadastre as salas primeiro.</span>`}</div>
  <div class="row"><button onclick="addUser()">+ Cadastrar acesso</button></div></section>
  <section class="card"><h2>Acessos cadastrados</h2><div class="sc"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Cargo</th><th>Salas</th><th></th></tr></thead><tbody>${S.users.map(u=>`<tr><td class="nm">${esc(u.nome)}</td><td>${esc(u.email)}</td><td>${u.cargo}</td>
@@ -355,9 +433,9 @@ async function exportar(){const sim=S.simulados.find(s=>s.id===ui.rsim);if(!sim|
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(Object.keys(all.bym).map(m=>({"Matéria":m,"% de acerto":all.bym[m].t?Math.round(all.bym[m].h/all.bym[m].t*100):0}))),"Matérias");
  salvarArq(sim.titulo+".xlsx",XLSX.write(wb,{type:"array",bookType:"xlsx"}))}
 function backup(){salvarArq("backup-simulados.json",JSON.stringify(S))}
-function restaurar(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.salas)||!Array.isArray(o.alunos)||!Array.isArray(o.simulados))throw 0;
- S=Object.assign({resp:{},users:[],desc:{}},o,{seeded:true});save();draft=null;sess.u=null;persist();render();toast("Backup restaurado")}catch(e){toast("Arquivo de backup inválido")}};r.readAsText(f);inp.value=""}
-render();
+function restaurar(inp){if(!isC()){inp.value="";return toast("Somente o coordenador logado pode restaurar")}const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.salas)||!Array.isArray(o.alunos)||!Array.isArray(o.simulados))throw 0;
+ S=Object.assign({resp:{},desc:{}},o,{seeded:true,users:S.users});save();draft=null;render();toast("Backup restaurado")}catch(e){toast("Arquivo de backup inválido")}};r.readAsText(f);inp.value=""}
+iniciar();
 </script>
 </body>
 </html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script type="importmap">{"imports": {"@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"}}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulados · Provão Paulista</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#eef3fb;--card:#fff;--fg:#0f1d3a;--mut:#5b6b88;--line:#dbe4f3;--pri:#1d4ed8;--pri2:#2563eb;--ok:#047857;--okbg:#d1fae5;--bad:#b91c1c;--badbg:#fee2e2;--soft:#eff4ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131c2e;--fg:#e6ecf8;--mut:#93a3c0;--line:#25324d;--pri:#60a5fa;--pri2:#2563eb;--ok:#6ee7b7;--okbg:#064e3b;--bad:#fca5a5;--badbg:#7f1d1d;--soft:#16233d}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#131c2e;--fg:#e6ecf8;--mut:#93a3c0;--line:#25324d;--pri:#60a5fa;--pri2:#2563eb;--ok:#6ee7b7;--okbg:#064e3b;--bad:#fca5a5;--badbg:#7f1d1d;--soft:#16233d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:linear-gradient(120deg,#1e3a8a,#2563eb);color:#fff;box-shadow:0 2px 10px #0003}
+.top{max-width:1100px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top h1{font-size:18px;margin:0;flex:1;min-width:180px}.top h1 small{display:block;font-weight:400;opacity:.8;font-size:12px}#who{font-size:13px;opacity:.9}
+.nav{max-width:1100px;margin:auto;display:flex;gap:4px;padding:0 12px;overflow-x:auto}
+.nav button{background:none;border:0;color:#dbe7ff;padding:10px 14px;font:600 14px inherit;font-family:inherit;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;border-radius:0}
+.nav button.on{color:#fff;border-color:#fff}
+main{max-width:1100px;margin:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px #0001}
+.login{max-width:430px;margin:36px auto;display:flex;flex-direction:column;gap:10px}.link{color:var(--pri);cursor:pointer;text-align:center;font-size:13px}
+h2{font-size:16px;margin:0 0 10px;color:var(--pri)}
+.row,.grid{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}.grid>*{flex:1 1 150px}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri2);border-color:transparent}
+textarea{width:100%;min-height:64px}
+button{font:600 14px inherit;font-family:inherit;border:0;border-radius:9px;padding:9px 14px;background:var(--pri2);color:#fff;cursor:pointer}
+button.ghost{background:var(--soft);color:var(--pri)}button.red{background:var(--badbg);color:var(--bad)}button.sm{padding:5px 9px;font-size:12px}
+.hbtn{background:#ffffff26;color:#fff;font-size:13px}.chk{display:inline-flex;gap:4px;margin:2px 12px 2px 0;align-items:center}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.tab{background:var(--card);color:var(--fg);border:1px solid var(--line);white-space:nowrap}.tab.on{background:var(--pri2);color:#fff;border-color:var(--pri2)}
+.mut{color:var(--mut)}.warn{background:var(--badbg);color:var(--bad);border-radius:10px;padding:10px 12px;margin-bottom:12px}.sc{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+th{background:var(--soft);color:var(--pri);position:sticky;top:0}td.nm,th:nth-child(2){text-align:left}tr.gh th{font-size:11px;border-left:1px solid var(--line)}
+.sheet td input.c{width:34px;height:34px;padding:0;text-align:center;font-weight:700;text-transform:uppercase;border-radius:7px}
+.sheet input.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}.sheet input.bad{background:var(--badbg);color:var(--bad);border-color:var(--bad)}
+tr.gab td,tfoot td{background:var(--soft);font-weight:700;font-size:12px}.tot{font-weight:700;color:var(--pri)}
+.qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin-top:10px}
+.q{display:flex;gap:6px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:6px}.q b{width:22px;text-align:center}
+.q select{flex:1 1 120px;font-size:12px}.L{padding:5px 8px;background:var(--soft);color:var(--pri)}.L.on{background:var(--pri2);color:#fff}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.kpi b{display:block;font-size:26px;color:var(--pri)}
+.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}.bar i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,#2563eb,#60a5fa)}.bar span:first-child{width:170px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0f1d3a;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90vw}#toast.on{opacity:1}
+@media(max-width:560px){.bar span:first-child{width:110px}}
+</style>
+</head>
+<body>
+<header id="hdr" hidden>
+ <div class="top"><h1>🎓 Simulados · Provão Paulista<small>Ensino Médio · correção por sala e descritor</small></h1><span id="who"></span>
+  <span id="bk"><button class="hbtn" onclick="backup()">⬇ Backup</button>
+  <label class="hbtn" style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px">⬆ Restaurar<input type="file" accept=".json" hidden onchange="restaurar(this)"></label></span>
+  <button class="hbtn" onclick="sair()">Sair</button></div>
+ <nav class="nav" id="nav"></nav>
+</header>
+<main id="main"></main>
+<div id="toast"></div>
+<script>
+/* ---------- SUPABASE ---------- */
+const SUPABASE_URL = 'https://dmhdvzzylxjietbszmjp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_T3TTEf1MFUjwGad7B12AkA_H0NIXxyz';
+let supabase = null;
+const supaPronto = import('@supabase/supabase-js').then(m=>{ supabase = m.createClient(SUPABASE_URL, SUPABASE_KEY); window.supabase = supabase; }).catch(e=>console.log('Supabase indisponível', e));
+const KEY="simulados_v1",$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SER={"1EM":"1ª EM","2EM":"2ª EM","3EM":"3ª EM"},MAT=["Português","Matemática","Biologia","Química","Física","Geografia","História","Inglês","Educação Financeira"];
+const TABS={alunos:"👥 Cadastrar alunos",simulados:"📝 Cadastrar simulado",notas:"✅ Lançar notas",res:"📊 Resultados",acessos:"🔑 Acessos"};
+
+/* ---------- dados ---------- */
+// Simulado do PDF "Simulado Provão Paulista 2026 · 1ª série · 1º dia" (48 questões). O PDF não traz gabarito: fica pendente.
+function seedSim(){const g=[];[["Português",18],["Inglês",6],["Física",8],["Química",8],["Biologia",8]].forEach(([m,n])=>{for(let i=0;i<n;i++)g.push({c:"",d:"",m})});
+ return{id:uid(),titulo:"Simulado Provão Paulista 2026 · 1ª série · 1º dia",serie:"1EM",materia:"Várias matérias",data:"",gab:g}}
+let S=null;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+S=Object.assign({salas:[],alunos:[],simulados:[],resp:{},users:[],desc:{},seeded:false},S||{});
+if(!S.desc["Educação Financeira"])S.desc["Educação Financeira"]=[["EF01","Juros"],["EF02","Orçamento"],["EF03","Dívidas"],["EF04","Investimentos"]];
+if(!S.seeded){if(!S.simulados.length)S.simulados.push(seedSim());S.seeded=true}
+/* Turmas pré-carregadas: importadas uma única vez (não duplica e não recria alunos que você excluir). Formato: [nº chamada, nome, RA, dígito] */
+const ROSTER=[{sala:"1ª EM A",serie:"1EM",alunos:[["3","ATANAEL FELIPPE PEREIRA DA SILVA","000111792310","1"],["4","BRAYAN NERI DA SILVA","000113296330","8"],["5","EMANUELLA VITORIA DA SILVA FERREIRA","000112595603","3"],["6","ERIK MIGUEL DE MELO SILVA","000113324542","0"],["7","JESSICA LORIE MENEZES DOS SANTOS","000116306215","7"],["8","JULIA HELOISA CASTRO JESUS","000111885106","7"],["9","KARLA SOFYA DE SOUSA","000124314909","7"],["10","LUCAS CLAUDIO VIEIRA","000114064189","X"],["13","RAPHAEL GONÇALVES DOS SANTOS","000110407079","0"],["15","VICTOR EMERSON DA SILVA SANTOS PAZ","000114597506","9"],["16","VICTOR LUZ MEDRADO","000113266083","X"],["17","VITORIA SANTOS SANTANA","000114655717","6"],["19","JOSE FERNANDO CARVALHO CAVALCANTI","000112733518","2"],["24","ASHILLEY OLIVEIRA DOS SANTOS","000111711456","9"],["29","MIKAELLY VITORIA SILVA SOUZA","000112599713","8"],["34","FLÁVIO GONÇALVES DE MAGALHÃES SILVA","000111675461","7"],["37","CHARLES ANJOS SANTOS","000125723582","5"],["38","CHIRLE ANJOS SANTOS","000126349135","2"],["39","GUSTAVO EZEQUIEL FERNANDES JESUS","000111861836","1"],["43","LUIS OTAVIO FERREIRA DA SILVA","000112539929","6"],["44","PIETRA DE SOUSA RODRIGUES","000113516602","X"],["45","HIGOR GABRIEL VICENTE DA SILVA","000112859717","2"],["47","ARISSA ESTER PEREIRA DA SILVA","000113493118","9"],["52","LUANA SILVA DE SOUSA","000115708039","X"],["53","THALYS VINICIUS COSTA NERIS","000126111041","9"],["54","RAFAELA FERNANDES MARINGOLO","000111777178","7"],["55","JUAN VIANA DA HORA","000112472674","3"],["58","PEDRO HENRIQUE ALMEIDA DE SOUZA","000113306289","1"],["60","VITORIA FERNANDES FARIAS","000115335593","0"],["61","MICKAELLY SILVA LEITE PEREIRA","000112614524","5"],["62","ROONEY LUIS OLIVEIRA SILVA","000112596797","3"],["63","GUILHERME AUGUSTO NOVAIS DE ALMEIDA","000110374652","2"],["64","PEDRO HENRIQUE VIEIRA GONZAGA","000114041005","2"],["66","PEDRO HENRIQUE DA SILVA FERREIRA","000112544386","8"],["67","ANA CLARA ALVES DOS SANTOS BARROS","000111825088","6"],["70","GIULIANO ANDRADE ARAUJO","000113959635","4"],["71","ROBSON LUCIANO MORAIS ANTUNES","000112791784","5"],["72","DAVI LUIZ NEVES LOPES","000112568158","5"],["73","FELIPE VIEIRA SOUSA DO NASCIMENTO","000113348443","8"],["33","GABRIEL DE SANTANA SANTOS PEREIRA","000113241389","8"],["2","ANDRESSA PIMENTEL SANTANA","000125907458","4"],["11","MYRELLA DAMIAO DOS SANTOS","000111675395","9"],["18","MARIA KAROLINE XAVIER SILVA","000125649907","9"],["20","MARYANE ALMEIDA SANTOS SILVA","000111675372","8"],["21","PEDRO DA CONCEICAO RODRIGUES CORREIA","000111771695","8"],["25","SARA CRISTINA DA SILVA","000113313662","X"],["26","NICOLAS CORREA DA SILVA","000110877419","2"],["30","ANA LUIZA AMORIM DE OLIVEIRA","000113284269","4"],["32","DENNYS WALLACE SANTOS DO NASCIMENTO","000113020076","0"],["35","NATALIA DANTAS DO VALE","000111691694","0"],["36","LUIS OTAVIO NERES DA SILVA SOUSA","000109477815","1"],["41","MYRELLY SILVA SANTOS","000111861940","7"],["49","ICARO FERREIRA DA SILVA","000111741309","3"],["51","GABRIELLY ALVES DA ROCHA DE SOUZA","000113180449","1"],["56","WALLAS ADRIEL SANTOS SILVA","000115031735","8"],["1","ANA CRISTINA TAVARES DIAS","000113767225","0"],["12","RAFAELA FERREIRA","000111829156","6"],["14","THIAGO PEREIRA COELHO","000112755225","9"],["22","ISABELLY ALVES DE OLIVEIRA","000111742989","1"],["23","MURILO FERRAZ ROCHA","000111691445","1"],["27","NICOLLY CRUZ FELIX","000114736356","0"],["28","MAVILA YASMIN DE LAVOR","000113483816","5"],["31","NICOLLY RAMALHO DO NASCIMENTO","000112202967","6"],["40","CARLOS EDUARDO SOUZA BUENO","000111725890","7"],["42","ALANA RODRIGUES DE OLIVEIRA","000111829998","X"],["46","EDINSON JESUS MIQUILENA AROCHA","000126144656","2"],["48","YASMIN NEGOZEKI CAVALCANTI","000110398986","8"],["50","MELISSA SOUZA ROMÃO","000111472793","3"],["57","EVILLYN NOGUEIRA JACINTO","000112824800","1"],["59","CARLOS HENRIQUE ROCHA DE OLIVEIRA","000111691599","6"],["65","ENZO DE MELO MAGALHAES","000112619625","3"],["68","THAYLA VITORIA FERNANDES DA SILVA","000112679200","7"],["69","JOÃO VICTOR AGUIAR DA SILVA","000113608653","5"],["43","NAYARA DOMINGUES CANDIDO","000113273233","5"]]},{"sala":"1ª EM B","serie":"1EM","alunos":[["1","ALEXANDRE ALONSO SILVA","000115498803","X"],["10","FLAVIA GABRIELA SOARES DA SILVA","000114988351","0"],["14","JOSE CARLOS BOAVENTURA JUNIOR","000111784846","2"],["17","LUANA OLIVEIRA DA SILVA","000111829802","0"],["18","LUANA VITORIA BALBINO DA SILVA","000113519623","0"],["19","LUCAS ANTONIO BARAUNA DOS SANTOS","000111690395","7"],["21","LUIZ GUSTAVO ARAUJO DA SILVA DIONISIO","000115800686","X"],["22","MARCOS VINICIUS RODRIGUES DA SILVA","000111830739","2"],["23","MARIA EDUARDA SANTANA DA SILVA BEZERRA","000113492304","1"],["24","MARIA ELOYSE DE QUEIROZ SILVA","000114727834","9"],["25","MATHEUS HENRIQUE DA SILVA SANTOS","000115360542","9"],["26","MIGUEL COSTA DA SILVA","000113538894","5"],["27","NICOLAS MATOS ALVARENGA","000113303581","4"],["28","RAFAEL AMORIM CAVALCANTI","000111829714","3"],["29","RAPHAEL ALMEIDA DE AQUINO","000114374742","2"],["31","RYANNA VITORIA SILVA DE ARAUJO","000113306336","6"],["35","WILLIAN DE JESUS FRANÇA","000111830602","8"],["37","YURI DOS ANJOS LIMA","000112326288","3"],["38","MIKAEL LIMA CAMPOS DE SOUSA","000111881179","3"],["40","WRIELLY KELLY MIRANDA DA SILVA","000114067669","6"],["41","NICOLLY DA SILVA GELAIN","000112985047","X"],["44","EMILLY VITORIA DE SOUSA","000113451338","0"],["45","ANA VIVIAN DE OLIVEIRA SILVA","000114966402","2"],["46","ARTHUR ALBUQUERQUE SILVA","000115388189","5"],["47","CAMILA DE OLIVEIRA MIQUELAN","000114513435","X"],["48","MIGUEL DE JESUS","000113286862","2"],["51","NATHALY ISABELA PEREIRA GUEDES","000110314762","6"],["53","MARIA EDUARDA PEREIRA BELEM","000113472986","8"],["57","RICHARD KAUAN FERREIRA DA CRUZ","000114570630","7"],["58","LUCAS EDUARDO DA SILVA RAMIRO","000113177023","7"],["60","JOSE GUILHERME DOS SANTOS FRANÇA","000114366670","7"],["61","MATEUS DE ANDRADE CORREIA","000114926251","5"],["63","MIGUEL CARLETO DA CONCEIÇÃO","000111788308","5"],["65","ADRIELE SILVA SANTOS","000115115402","7"],["66","KEVIN GONÇALVES NOGUEIRA NUNES","000110374837","3"],["67","ISABELLY VITÓRIA MONTEIRO DE LIMA","000126661470","9"],["69","KLEBER FERREIRA AMURIM","000113487268","9"],["70","LETICIA FERREIRA CRUZ","000111752897","2"],["71","MILENA DA SILVA SANTOS","000112821787","9"]]},{"sala":"1ª EM C","serie":"1EM","alunos":[["3","ANDRESSA PEREIRA CAMPELO DA SILVA","000114127816","9"],["5","EDUARDO GASTÃO GUIDI","000113035190","7"],["13","LUIS FERNANDO MESSIAS BORGES","000113303825","6"],["14","MARIA LUIZA RIBEIRO DA SILVA FERREIRA","000112590151","2"],["17","THIFANY PINHEIRO FROZ","000112791786","9"],["21","GABRIEL GARCIA DA SILVA","000112579187","1"],["22","ADRIELLE FERNANDA RAMOS SILVA","000110369954","4"],["27","ANA JULIA FERREIRA DOS SANTOS","000115458257","7"],["32","GUSTAVO FELIX DOS SANTOS","000111824325","0"],["33","YAINNELYS DEL VALLE GIL ACIVES","000123294125","6"],["36","CARLOS EDUARDO OLIVEIRA AMORIM","000113287846","9"],["37","LARISSA SOUZA DA SILVA","000113266125","0"],["41","VINICIUS ARAUJO DA COSTA SILVA","000112580444","0"],["44","GUILHERME WILLIAN OLIVEIRA DE SOUZA","000111829840","8"],["45","SARA VITÓRIA CARDOSO CORQUIOLA","000126452437","7"],["46","VITORIA SABRINA RODRIGUES DA PAIXAO","000115976936","9"],["47","ADRIEL SILVA SANTOS","000121986088","8"],["49","RAYANNE VITORIA CAPPABIANCA SIQUEIRA","000111885562","0"],["50","RENATA FERREIRA VILARES DE OLIVEIRA","000113149087","3"],["53","IAGO FERREIRA DA SILVA","000111741319","6"],["55","FELIPE DANIEL LUCAS MARIANO","000114053887","1"],["57","ALLAN GOULAR DOS SANTOS","000113286366","1"],["58","ANA CLARA NASCIMENTO FERREIRA","000113490008","9"],["59","MIRELLY CRISTINA MAXIMO ALVAREZ","000114351323","X"],["60","KEVIN WILLIAM VIEIRA DA SILVA","000115729479","0"],["61","THAUANA CRUZ DOS SANTOS","000113496089","X"],["62","JHONNY DOS SANTOS DE OLIVEIRA","000113500936","3"],["70","VICTOR HUGO FERNANDES GUIMARAES","000113520772","0"],["74","LUIZ HENRIQUE NASCIMENTO MACHADO","000113485425","0"],["77","EDUARDO VALERIO RODRIGUES DIAS","000113502124","7"],["78","LEONARDO GABRIEL SOARES MONTEIRO","000115090788","5"],["79","THAYNA LORRANY SANTOS DE SOUZA","000115514928","2"],["80","GABRIEL OLIVEIRA GOMES","000113622860","3"],["81","JULIA RAFAELA APARECIDA DE ASSIS DIAS","000113298991","7"],["82","GUILHERME ANTONIO DO CARMO MARTINS MESSIAS","000115026961","3"],["83","GUSTAVO SOARES SILVA","000113506966","9"],["84","ISAQUE NATHAN SANTOS GERMANO","000111725728","9"],["85","PEDRO HENRIQUE DA CRUZ NOBES","000110371985","3"],["86","VINICIOS ANTONIO ANGELO DE OLIVEIRA","000111839759","9"],["87","LUCAS DIAS","000113029674","X"]]},{"sala":"2ª EM B","serie":"2EM","alunos":[["10","KETHELLYN YASMYM VIEIRA DE SOUZA","000110372036","3"],["11","KHEROLLYN RAQUELY DE SOUZA","000112569859","7"],["15","RAKELLY DA SILVA","000125255596","9"],["21","BIANCA ARAUJO DA SILVA","000109206085","6"],["27","MYRELLA EVYLLIM RIBEIRO DA SILVA","000126337432","3"],["30","ANA LUIZA RUBIA DE FRANÇA","000110409551","8"],["34","HUGO VINICIUS DA SILVA PAP","000111741379","2"],["37","JULIA HENRIQUES DA SILVA","000112353007","5"],["40","KANHANY FERREIRA DE OLIVEIRA BRAGA","000112595156","4"],["47","GABRIELLA SANTOS BATISTA","000111839767","8"],["48","YAGO VINICIOS SANTOS MOREIRA","000111824534","9"],["51","ANE MARCELY MARIN DE SOUZA","000114351173","6"],["54","BEATRIZ ALVES DA SILVA","000112525579","1"],["58","YASMIN FERNANDA COSTA NIEPICUY","000111839707","1"],["62","GABRIEL MARQUES DA SILVA","000114034732","9"],["66","PEDRO HENRIQUE EDUARDO BASTOS DA CRUZ","000112360591","9"],["68","LIZ NICACIO DA SILVA","000111885689","2"],["79","MARIA EDUARDA SOUZA TEIXEIRA","000111844060","2"],["81","JULIA RIBEIRO DE ARAUJO","000113039705","1"],["82","DAFINY JULIA SANTOS DE OLIVEIRA","000113508458","0"],["83","DAVI FERREIRA DE ALMEIDA","000114916099","8"],["87","SILVIO GABRIEL JOSÉ DA SILVA","000113497361","5"],["88","BRUNA APARECIDA VIEIRA DOS SANTOS EDUARDO","000125877663","7"],["90","PATRICIA ALVES FRANÇA","000113313660","6"],["92","DIOGO SILVA PEIXOTO","000113030907","1"],["93","VITHORIA SANT'ANA CONCEIÇÃO","000111866052","3"],["95","JOÃO PEDRO RODRIGUES OLIVEIRA","000111877717","7"],["97","NEIDE ZITA NIMBI","000126709686","X"],["98","PAULO HENRIQUE ARAUJO CORREIA","000115428973","4"],["99","KAUANY FERNANDES SILVA","000111741097","3"],["100","JOAO VICTOR BARROS GOMES","000111825544","6"],["101","VITÓRIA DIAS MARTINS","000113429048","2"]]},{"sala":"2ª EM C","serie":"2EM","alunos":[["2","ANA BEATRIZ DOS SANTOS BRITO","000111689473","7"],["3","ANA CAROLINA REZENDE DE JESUS","000110399064","0"],["9","GUILHERME LENON DOS SANTOS ELIAS","000112556949","9"],["10","GUILHERME VIANA MUNCK","000115347162","0"],["16","JONATAN VINICIOS MARTINS FERREIRA","000112531888","0"],["18","KAUANY MONIQUE CRUZ DOS REIS","000111861825","7"],["34","MIRELLA FIGUEIREDO DE ARAUJO HELMER","000113489205","6"],["36","OTAVIO HENRIQUE ROSA FERREIRA","000112904317","4"],["41","SÉRGIO JUNIOR DE OLIVEIRA JOAQUIM","000109890203","8"],["44","PEDRO HENRIQUE RAMOS DE SOUSA","000111839773","3"],["45","VITORIA MARTINS DE SOUZA","000111844028","6"],["48","RALLYSON NORONHA DE SOUSA BEZERRA","000114108345","0"],["53","EVELLYN GOMES SILVA","000111690415","9"],["56","LUIZ OTÁVIO NASCIMENTO MENDES","000112600248","3"],["58","RODRIGO SANTOS CORREIA","000122760652","7"],["59","ISLANIA ALEXANDRE CAVALCANTE","000111689500","6"],["60","GABRIELA VITORIA DE ARAUJO VIEIRA","000110411679","0"],["61","HEVELYN CAMILLY TRIDICO RAMOS","000112835531","0"],["63","EVERTON HENRIQUE DE QUADROS LEAL","000112760736","4"],["64","VITOR HUGO MIRANDA DE GODOY","000111825286","X"],["66","ISABELA SILVA SANTOS DE JESUS","000115877178","2"],["67","KIARA VITORIA BARBOSA DOS SANTOS","000112589417","9"],["68","KETHELLY VITORIA RIBEIRO CARDOSO","000111742257","4"],["69","PABLO MATHEUS SANTOS AQUINO","000112560174","7"],["70","IAGO ANTONIO DA SILVA","000111825040","0"],["71","NOEMI VICTÓRYA GOMES SOARES","000110404383","X"],["72","BRENO MARCAL DE SOUZA","000110370218","X"],["74","NINA VITÓRIA DE MOURA GOMES","000111694199","5"],["75","MOACIR PETERSON PEREIRA NUNES","000111675141","0"]]},{"sala":"3ª EM A","serie":"3EM","alunos":[["2","ARIELLY FERREIRA DO COUTO","000113273346","7"],["3","DANILO RIBEIRO DA SILVA","000110070580","6"],["6","GABRIELY VIEIRA DOS SANTOS","000111839724","1"],["9","HENRIQUE ALVES ROCHA VIEIRA","000113096280","5"],["10","HIAGO RAMOS DA SILVA","000110398514","0"],["15","LAISA SILVA LOPES","000114129220","8"],["17","MARIA EDUARDA DE SOUZA SANTOS","000111667555","9"],["20","ROBERT KAUE SILVA AZEVEDO","000112482503","4"],["24","YASMIN VITORIA TEIXEIRA CORREA","000114357768","1"],["26","MICAELLE CRISTINA TRIDICO DE OLIVEIRA","000114050444","7"],["28","RENAN NUNZIO MARCONDES","000113260300","6"],["31","BRUNA NOVAIS DA SILVA","000111670375","0"],["34","GUSTAVO OLIVEIRA DOS SANTOS","000111741123","0"],["35","ALEXANDRE ANDERSON GOMES DOS SANTOS","000111861853","1"],["38","BEATRIZ MARCELINO NARCISO DOS SANTOS","000109450324","1"],["41","MARIA EDUARDA DUARTE FAGUNDES","000111668012","9"],["43","VINICIUS TOMAZ MAIA","000113102420","5"],["44","GUSTAVO GONCALVES RODRIGUES","000109483103","7"],["46","YASMIM FERREIRA DA SILVA","000110409542","7"],["47","NICOLLY REILANNE DA COSTA REIS","000125788320","3"],["48","ESTER RODRIGUES DINIZ","000110375015","X"],["49","EMERSON EDUARDO PEREIRA DA SILVA","000111887247","2"],["50","LUIZA DE LIRA STOKLEIN","000114260286","2"],["51","JULIA DE LIRA STOKLEIN","000114260258","8"],["54","ISABELLA DE SOUZA CARDOSO","000112239645","4"],["56","LUIZ FABIANO ALVES SENA DE SOUZA","000114281574","2"],["57","NATALINA CRUZ MARÇAL","000110916080","X"]]}];
+(function(){S.imp=S.imp||{};ROSTER.forEach(r=>{const k=r.sala+"|v1";if(S.imp[k])return;let sa=S.salas.find(s=>s.nome===r.sala);if(!sa){sa={id:uid(),nome:r.sala,serie:r.serie};S.salas.push(sa)}r.alunos.forEach(([num,nome,ra,dv])=>{if(!S.alunos.some(a=>a.ra===ra&&a.dv===dv))S.alunos.push({id:uid(),nome,num:String(num),ra,dv,sala:sa.id})});S.imp[k]=1})})();
+let saveTimeout=null, nuvemOk=false;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} clearTimeout(saveTimeout); if(!nuvemOk) return; saveTimeout=setTimeout(async()=>{ try{ await supaPronto; if(!supabase) return; const {error}=await supabase.from('backup_sistema').upsert({id:1,dados:S,updated_at:new Date().toISOString()},{onConflict:'id'}); if(error) console.log(error); else console.log('Salvo no Supabase'); }catch(e){} },800)}; save();
+async function carregarDoSupabase(){ try{ await supaPronto; if(!supabase) return; const {data,error}=await supabase.from('backup_sistema').select('dados').eq('id',1).maybeSingle(); if(error){ console.log(error); return }
+ const c=data&&data.dados; const n=o=>Object.keys(o||{}).length;
+ if(c&&((c.alunos||[]).length>S.alunos.length||(c.simulados||[]).length>S.simulados.length||n(c.resp)>n(S.resp))){ if(confirm('Dados mais novos no Supabase. Carregar?')){ S=Object.assign(S,c); localStorage.setItem(KEY,JSON.stringify(S)); location.reload(); return } }
+ nuvemOk=true; save() }catch(e){ console.log(e) } }
+carregarDoSupabase();
+const sess={u:null};try{sess.u=S.users.find(x=>x.id===sessionStorage.getItem("sim_u"))||null}catch(e){}
+const persist=()=>{try{sessionStorage.setItem("sim_u",sess.u?sess.u.id:"")}catch(e){}};
+const ui={tab:"alunos"};let draft=null;
+const isC=()=>sess.u&&sess.u.cargo==="coordenador",allowed=()=>isC()?Object.keys(TABS):["res"];
+const salasOrd=()=>[...S.salas].sort((a,b)=>a.serie.localeCompare(b.serie)||a.nome.localeCompare(b.nome,"pt",{numeric:true}));
+const visSalas=()=>isC()?salasOrd():salasOrd().filter(s=>(sess.u.salas||[]).includes(s.id));
+const alunosDe=id=>S.alunos.filter(a=>a.sala===id).sort((a,b)=>(+a.num||999)-(+b.num||999)||a.nome.localeCompare(b.nome));
+const dl=m=>S.desc[m]||[],mq=(sim,g)=>g.m||sim.materia,pend=sim=>sim.gab.some(g=>!g.c);
+const opts=(arr,sel)=>arr.map(([v,t])=>`<option value="${esc(v)}" ${v===sel?"selected":""}>${esc(t)}</option>`).join("");
+const serOpts=sel=>opts(Object.entries(SER),sel),matOpts=sel=>opts(MAT.map(m=>[m,m]),sel);
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),3200)}
+function sure(b,fn){if(b.dataset.s){fn();return}b.dataset.s=1;const t=b.textContent;b.textContent="Certeza?";setTimeout(()=>{delete b.dataset.s;b.textContent=t},3000)}
+function go(t){ui.tab=t;render();scrollTo(0,0)}
+function render(){const h=$("#hdr");
+ if(!sess.u){h.hidden=true;$("#main").innerHTML=S.users.length?vLogin():vSetup();return}
+ h.hidden=false;if(!allowed().includes(ui.tab))ui.tab=allowed()[0];$("#who").textContent=`👤 ${sess.u.nome} · ${sess.u.cargo}`;$("#bk").hidden=!isC();
+ $("#nav").innerHTML=allowed().map(t=>`<button class="${t===ui.tab?"on":""}" onclick="go('${t}')">${TABS[t]}</button>`).join("");
+ $("#main").innerHTML={alunos:vAlunos,simulados:vSim,notas:vNotas,res:vRes,acessos:vAcessos}[ui.tab]();if(ui.tab==="notas")footer()}
+
+/* ---------- acesso (login) ---------- */
+const rest=`<label class="link">ou restaurar um backup<input type="file" accept=".json" hidden onchange="restaurar(this)"></label>`;
+const vSetup=()=>`<section class="card login"><h2>🎓 Primeiro acesso</h2><p class="mut">Cadastre o coordenador responsável. Depois disso, só entra quem tiver cadastro.</p>
+ <input id="u_nome" placeholder="Nome completo"><input id="u_email" type="email" placeholder="E-mail"><input id="u_s1" type="password" placeholder="Senha (mín. 8 caracteres)"><input id="u_s2" type="password" placeholder="Repita a senha"><button onclick="setup()">Criar acesso do coordenador</button>${rest}</section>`;
+const vLogin=()=>`<section class="card login"><h2>🎓 Simulados · Provão Paulista</h2><p class="mut">Acesso restrito a professores e coordenação.</p>
+ <input id="l_email" type="email" placeholder="E-mail"><input id="l_s" type="password" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()"><button onclick="entrar()">Entrar</button>${rest}</section>`;
+async function hash(p,salt){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(salt+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function mkUser(nome,email,senha,cargo,salas){nome=nome.trim();email=email.trim().toLowerCase();
+ if(!nome||!/^\S+@\S+\.\S+$/.test(email))return"Informe nome e e-mail válidos";if(senha.length<8)return"A senha precisa ter ao menos 8 caracteres";
+ if(S.users.some(u=>u.email===email))return"E-mail já cadastrado";if(!window.crypto||!crypto.subtle)return"Este navegador não suporta criptografia de senha";
+ const salt=uid()+uid();S.users.push({id:uid(),nome,email,cargo,salas:salas||[],salt,hash:await hash(senha,salt)});save();return""}
+async function setup(){if($("#u_s1").value!==$("#u_s2").value)return toast("As senhas não conferem");
+ const e=await mkUser($("#u_nome").value,$("#u_email").value,$("#u_s1").value,"coordenador");if(e)return toast(e);sess.u=S.users[S.users.length-1];persist();ui.tab="alunos";render()}
+async function entrar(){const u=S.users.find(x=>x.email===$("#l_email").value.trim().toLowerCase());
+ if(!u||await hash($("#l_s").value,u.salt)!==u.hash)return toast("E-mail ou senha inválidos");sess.u=u;persist();ui.tab="alunos";render()}
+function sair(){sess.u=null;persist();render()}
+function vAcessos(){return `<section class="card"><h2>Cadastrar professor ou coordenador</h2><div class="grid"><input id="n_nome" placeholder="Nome"><input id="n_email" type="email" placeholder="E-mail"><input id="n_s" type="password" placeholder="Senha (mín. 8)"><select id="n_c" onchange="$('#n_salas').hidden=this.value!=='professor'"><option value="professor">Professor</option><option value="coordenador">Coordenador</option></select></div>
+ <div id="n_salas"><p class="mut" style="margin:6px 0">Salas do professor (ele só verá os resultados dessas salas):</p>${salasOrd().map(s=>`<label class="chk"><input type="checkbox" value="${s.id}">${esc(s.nome)}</label>`).join("")||`<span class="mut">Cadastre as salas primeiro.</span>`}</div>
+ <div class="row"><button onclick="addUser()">+ Cadastrar acesso</button></div></section>
+ <section class="card"><h2>Acessos cadastrados</h2><div class="sc"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Cargo</th><th>Salas</th><th></th></tr></thead><tbody>${S.users.map(u=>`<tr><td class="nm">${esc(u.nome)}</td><td>${esc(u.email)}</td><td>${u.cargo}</td>
+ <td>${u.cargo==="professor"?(u.salas.map(id=>(S.salas.find(s=>s.id===id)||{}).nome).filter(Boolean).map(esc).join(", ")||"—"):"todas"}</td><td>${u.id===sess.u.id?"":`<button class="red sm" onclick="sure(this,()=>delUser('${u.id}'))">Excluir</button>`}</td></tr>`).join("")}</tbody></table></div></section>`}
+async function addUser(){const c=$("#n_c").value,salas=[...document.querySelectorAll("#n_salas input:checked")].map(x=>x.value);
+ const e=await mkUser($("#n_nome").value,$("#n_email").value,$("#n_s").value,c,c==="professor"?salas:[]);if(e)return toast(e);render();toast("Acesso cadastrado")}
+function delUser(id){S.users=S.users.filter(u=>u.id!==id);save();render()}
+
+/* ---------- ALUNOS ---------- */
+function vAlunos(){const sl=salasOrd();if(!S.salas.find(s=>s.id===ui.sala))ui.sala=sl[0]&&sl[0].id;const sala=S.salas.find(s=>s.id===ui.sala);
+ return `<section class="card"><h2>Salas do Ensino Médio</h2>
+ <div class="row"><input id="ns" placeholder="Nova sala (ex.: 1ª EM A)"><select id="nsr">${serOpts("1EM")}</select><button onclick="addSala()">+ Sala</button></div>
+ <div class="row"><span class="mut">Gerar várias de uma vez — turmas por série:</span><input id="nt" type="number" min="1" max="12" value="5" style="width:80px"><button class="ghost" onclick="gerarSalas()">Criar salas (A, B, C…)</button></div></section>
+ ${vImp()}
+ ${sala?`<div class="tabs">${sl.map(s=>`<button class="tab ${s.id===ui.sala?"on":""}" onclick="ui.sala='${s.id}';render()">${esc(s.nome)}</button>`).join("")}</div>
+ <section class="card"><h2>Cadastrar aluno em ${esc(sala.nome)}</h2>
+ <div class="row"><input id="a_nome" placeholder="Nome completo" style="flex:2 1 220px"><input id="a_num" type="number" placeholder="Nº chamada" style="width:120px"><input id="a_ra" placeholder="RA" style="width:140px"><input id="a_dv" placeholder="Dígito" style="width:80px"><button onclick="addAluno()">+ Cadastrar</button></div>
+ <textarea id="cola" placeholder="Ou cole da planilha (uma linha por aluno): Nome ⇥ Nº chamada ⇥ RA ⇥ Dígito"></textarea><div class="row"><button class="ghost" onclick="colar()">Importar linhas coladas</button></div></section>
+ <section class="card"><h2>${alunosDe(sala.id).length} aluno(s) · ${esc(sala.nome)} <button class="red sm" style="float:right" onclick="sure(this,()=>delSala('${sala.id}'))">Excluir sala</button></h2>
+ <div class="sc"><table><thead><tr><th>Nº</th><th>Nome</th><th>RA</th><th>Díg.</th><th></th></tr></thead><tbody>${alunosDe(sala.id).map(a=>`<tr>
+ <td><input style="width:60px" value="${esc(a.num)}" onchange="upd('${a.id}','num',this.value)"></td><td><input style="width:100%;min-width:200px" value="${esc(a.nome)}" onchange="upd('${a.id}','nome',this.value)"></td>
+ <td><input style="width:130px" value="${esc(a.ra)}" onchange="upd('${a.id}','ra',this.value)"></td><td><input style="width:60px" value="${esc(a.dv)}" onchange="upd('${a.id}','dv',this.value)"></td>
+ <td><button class="red sm" onclick="sure(this,()=>delAluno('${a.id}'))">Excluir</button></td></tr>`).join("")}</tbody></table></div></section>`:`<section class="card mut">Crie as salas acima para começar.</section>`}`}
+function addSala(){const n=$("#ns").value.trim();if(!n)return toast("Informe o nome da sala");if(S.salas.some(s=>s.nome===n))return toast("Sala já existe");S.salas.push({id:uid(),nome:n,serie:$("#nsr").value});save();render()}
+function gerarSalas(){const n=Math.min(12,Math.max(1,+$("#nt").value||5));let c=0;
+ Object.keys(SER).forEach(k=>{for(let i=0;i<n;i++){const nome=`${SER[k]} ${String.fromCharCode(65+i)}`;if(!S.salas.some(s=>s.nome===nome)){S.salas.push({id:uid(),nome,serie:k});c++}}});save();render();toast(c+" sala(s) criada(s)")}
+function delSala(id){S.salas=S.salas.filter(s=>s.id!==id);S.alunos=S.alunos.filter(a=>a.sala!==id);S.users.forEach(u=>u.salas=(u.salas||[]).filter(x=>x!==id));save();render()}
+function novoAluno(nome,num,ra,dv){nome=(nome||"").trim();ra=(ra||"").trim();dv=(dv||"").trim();if(!nome||!ra||S.alunos.some(a=>a.ra===ra&&a.dv===dv))return false;S.alunos.push({id:uid(),nome,num:String(num||"").trim(),ra,dv,sala:ui.sala});return true}
+function addAluno(){if(!novoAluno($("#a_nome").value,$("#a_num").value,$("#a_ra").value,$("#a_dv").value))return toast("Informe nome e RA (o RA não pode repetir)");save();render();$("#a_nome").focus()}
+function colar(){let ok=0;$("#cola").value.split("\n").forEach(l=>{const c=l.split(/\t|;/);if(c.length>=3&&novoAluno(c[0],c[1],c[2],c[3]))ok++});save();render();toast(ok+" aluno(s) importado(s)")}
+function upd(id,k,v){S.alunos.find(x=>x.id===id)[k]=v.trim();save()}
+function delAluno(id){S.alunos=S.alunos.filter(a=>a.id!==id);Object.values(S.resp).forEach(r=>delete r[id]);save();render()}
+
+/* ---------- SIMULADOS ---------- */
+function novo(){draft={id:null,titulo:"",serie:"1EM",data:"",gab:Array.from({length:20},()=>({c:"",d:"",m:"Português"}))}}
+function dopts(g){const l=dl(g.m).map(([c,t])=>[c,c+" — "+t]);if(g.d&&!l.some(x=>x[0]===g.d))l.push([g.d,g.d]);return opts([["","Descritor…"],...l],g.d)}
+function vSim(){if(!draft)novo();const d=draft;
+ return `<section class="card"><h2>${d.id?"Editar":"Cadastrar"} simulado</h2><div class="grid">
+ <input placeholder="Título (ex.: Provão Paulista – 1º bimestre)" value="${esc(d.titulo)}" oninput="draft.titulo=this.value" style="flex:2 1 260px">
+ <select onchange="draft.serie=this.value">${serOpts(d.serie)}</select><input type="date" value="${d.data}" oninput="draft.data=this.value"></div>
+ <div class="row"><span class="mut">Nº de questões:</span><input type="number" min="1" max="90" value="${d.gab.length}" style="width:90px" onchange="resize(+this.value)">
+ <input placeholder="Gabarito rápido: ABCDE… (Enter)" style="flex:1" onchange="quick(this.value)"></div>
+ <div class="row"><span class="mut">Matéria das questões</span><input id="bde" type="number" min="1" placeholder="de" style="width:70px"><input id="bate" type="number" min="1" placeholder="até" style="width:70px"><select id="bm">${matOpts("")}</select><button class="ghost" onclick="bulk()">Aplicar</button></div>
+ <div class="row" style="border:1px dashed var(--line);border-radius:10px;padding:10px"><b>📄 Importar de arquivo</b><label style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);color:var(--pri)">⬆ Prova (PDF)<input type="file" accept=".pdf,.txt" hidden onchange="impProva(this)"></label><label style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);color:var(--pri)">⬆ Gabarito (PDF, TXT ou CSV)<input type="file" accept=".pdf,.txt,.csv" hidden onchange="impGabArq(this)"></label><span class="mut" style="flex-basis:100%;font-size:12.5px">A prova define o nº de questões, as matérias e a série; o gabarito preenche as letras. Confira tudo abaixo antes de salvar. Ler PDF exige internet; PDF escaneado (imagem) não funciona — nesse caso use a caixa de colar ou o gabarito rápido.</span></div>
+ <details><summary class="mut" style="cursor:pointer">Colar gabarito (vale “1-A 2-B 3-C…”, uma sequência “ABCDE…” ou Questão ⇥ Letra ⇥ Matéria ⇥ Descritor)</summary><textarea id="gcola" placeholder="1-A  2-B  3-C&#10;ou 1;A;Português;D01"></textarea><div class="row"><button class="ghost" onclick="impGab()">Importar gabarito</button></div></details>
+ <div class="qs">${d.gab.map((g,i)=>`<div class="q"><b>${i+1}</b><span>${"ABCDE".split("").map(l=>`<button class="L ${g.c===l?"on":""}" onclick="setL(${i},'${l}',this)">${l}</button>`).join("")}</span>
+ <select onchange="draft.gab[${i}].m=this.value;draft.gab[${i}].d='';render()">${matOpts(g.m)}</select><select onchange="draft.gab[${i}].d=this.value">${dopts(g)}</select></div>`).join("")}</div>
+ <div class="row"><button onclick="salvarSim()">💾 Salvar simulado</button>${d.id?`<button class="ghost" onclick="draft=null;render()">Cancelar edição</button>`:""}</div></section>
+ ${vDesc()}
+ <section class="card"><h2>Simulados cadastrados</h2>
+ <div class="row"><label class="ghost" style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);color:var(--pri)">⬆ Importar simulado (.json)<input type="file" accept=".json" hidden onchange="importarSim(this)"></label></div>
+ ${S.simulados.length?S.simulados.map(s=>`<div class="row" style="border-top:1px solid var(--line);padding-top:8px"><div style="flex:1;min-width:200px"><b>${esc(s.titulo)}</b><br><span class="mut">${SER[s.serie]} · ${esc(s.materia)} · ${s.gab.length} questões${s.data?" · "+s.data.split("-").reverse().join("/"):""}${pend(s)?` · <b style="color:var(--bad)">gabarito pendente (${s.gab.filter(g=>!g.c).length})</b>`:""}</span></div>
+ <button onclick="ui.nsim='${s.id}';go('notas')">Lançar notas</button><button class="ghost" onclick="editSim('${s.id}')">Editar / gabarito</button><button class="ghost" onclick="expSim('${s.id}')">Exportar</button><button class="red" onclick="sure(this,()=>delSim('${s.id}'))">Excluir</button></div>`).join(""):`<p class="mut">Nenhum simulado cadastrado.</p>`}</section>`}
+function setL(i,l,b){draft.gab[i].c=l;b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))}
+const blank=m=>({c:"",d:"",m:m||"Português"});
+function resize(n){n=Math.min(90,Math.max(1,n||1));while(draft.gab.length<n)draft.gab.push(blank(draft.gab.length?draft.gab[draft.gab.length-1].m:""));draft.gab.length=n;render()}
+function quick(v){v=v.toUpperCase().replace(/[^A-E]/g,"");if(!v)return;while(draft.gab.length<v.length)draft.gab.push(blank());v.split("").forEach((c,i)=>draft.gab[i].c=c);render()}
+function bulk(){const a=+$("#bde").value,b=+$("#bate").value||a,m=$("#bm").value;if(!a||!m)return toast("Informe o intervalo e a matéria");
+ for(let i=a-1;i<Math.min(b,draft.gab.length);i++){if(draft.gab[i].m!==m)draft.gab[i].d="";draft.gab[i].m=m}render()}
+/* ---------- CADASTRAR TURMA POR PDF / TXT ---------- */
+const SITS="Ativo|Transferido|Remanejamento|Não Comparecimento|BAIXA - TRANSFERÊNCIA|TROCA ALUNO ENTRE CLASSES|TROCA ALUNO ENTRE ESCOLAS|[A-Za-zÀ-ú]+";
+function parseLista(t){const rows=[],seen=new Set(),flat=t.replace(/\s+/g," ");
+ const rx=new RegExp("(?:^|\\s)(\\d{1,3})\\s+([^\\d]+?)\\s+(\\d{9,13})\\s+([0-9Xx])(?=\\s|$)(?:\\s+([A-Za-z]{2})\\s+(\\d{2}/\\d{2}/\\d{4})\\s+("+SITS+"))?","gi");let m;
+ while((m=rx.exec(flat))){const ra=m[3].padStart(12,"0"),dv=m[4].toUpperCase(),k=ra+dv,rep=seen.has(k);seen.add(k);
+  rows.push({num:m[1],nome:m[2].replace(/\s+/g," ").trim(),ra,dv,sit:m[7]||"",rep});rx.lastIndex=m.index+m[0].length-1}
+ return rows}
+function salaDoArq(n){const m=String(n).match(/(?<!\d)([123])\s*[-_ ]\s*([A-Za-z])(?![A-Za-z])/);return m?{serie:m[1]+"EM",nome:SER[m[1]+"EM"]+" "+m[2].toUpperCase()}:null}
+function mkGrupo(nomeArq,t){const rows=parseLista(t);if(!rows.length)return null;
+ const d=salaDoArq(nomeArq.replace(/\.[^.]+$/,""))||salaDoArq(t.trim().split("\n").slice(0,2).join(" ")),ex=d&&S.salas.find(s=>s.nome===d.nome);
+ rows.forEach(r=>{const x=S.alunos.find(a=>a.ra===r.ra&&a.dv===r.dv);r.ja=x?((S.salas.find(s=>s.id===x.sala)||{}).nome||"outra sala"):"";r.on=!r.ja&&!r.rep&&(!r.sit||/^ativo$/i.test(r.sit))});
+ return{f:nomeArq,rows,dest:ex?ex.id:(d?"new":(ui.sala||"new")),nome:d?d.nome:"",serie:d?d.serie:"1EM"}}
+async function impAlunosArq(inp){const fs=[...inp.files];inp.value="";if(!fs.length)return;const G=[],vazios=[];
+ for(const f of fs){try{toast("Lendo "+f.name+"…");const g=mkGrupo(f.name,await arqTexto(f));g?G.push(g):vazios.push(f.name)}catch(e){return toast(e.message||"Não consegui ler "+f.name)}}
+ ui.imp=(ui.imp||[]).concat(G);render();
+ toast(G.length?`${G.length} lista(s) lida(s) — confira e clique em Cadastrar`+(vazios.length?` (sem alunos reconhecidos: ${vazios.join(", ")})`:""):"Não encontrei alunos nesse arquivo (PDF escaneado/imagem não funciona). Use a caixa de colar da planilha.")}
+const sitsDe=g=>[...new Set(g.rows.map(r=>r.sit||"Sem situação"))];
+function impCnt(){const G=ui.imp||[];let t=0;G.forEach((g,i)=>{const n=g.rows.filter(r=>r.on).length;t+=n;const e=document.getElementById("ic"+i);if(e)e.textContent=n});const e=document.getElementById("ict");if(e)e.textContent=t}
+function impSit(i,k,v){const g=ui.imp[i],s=sitsDe(g)[k];g.rows.forEach(r=>{if((r.sit||"Sem situação")===s&&!r.ja&&!r.rep)r.on=v});render()}
+function impDest(i,v){ui.imp[i].dest=v;render()}
+function vImp(){const G=ui.imp||[],lab='style="padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);color:var(--pri)"';
+ return `<section class="card"><h2>📄 Cadastrar turma por PDF</h2><p class="mut" style="margin:0 0 8px">Envie a lista de alunos de cada sala (PDF da Secretaria Escolar Digital ou TXT) — pode escolher vários arquivos de uma vez. Antes de cadastrar você confere tudo; por padrão só entram os alunos <b>Ativos</b>.</p>
+ <div class="row"><label ${lab}>⬆ Escolher PDF(s) / TXT<input type="file" accept=".pdf,.txt" multiple hidden onchange="impAlunosArq(this)"></label>${G.length?`<button class="ghost" onclick="ui.imp=null;render()">Limpar</button>`:""}</div>
+ ${G.map((g,i)=>{const ss=sitsDe(g);return `<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:8px"><div class="row"><b>${esc(g.f)}</b><span class="mut">${g.rows.length} aluno(s) na lista · <span id="ic${i}">${g.rows.filter(r=>r.on).length}</span> selecionado(s)</span></div>
+ <div class="row"><span class="mut">Cadastrar em:</span><select onchange="impDest(${i},this.value)">${opts([...salasOrd().map(s=>[s.id,s.nome]),["new","➕ Nova sala…"]],g.dest)}</select>${g.dest==="new"?`<input placeholder="Nome da sala (ex.: 1ª EM B)" value="${esc(g.nome)}" oninput="ui.imp[${i}].nome=this.value" style="width:200px"><select onchange="ui.imp[${i}].serie=this.value">${serOpts(g.serie)}</select>`:""}</div>
+ <div class="row"><span class="mut">Situação:</span>${ss.map((s,k)=>{const rs=g.rows.filter(r=>(r.sit||"Sem situação")===s),pod=rs.filter(r=>!r.ja&&!r.rep);return `<label class="chk"><input type="checkbox" ${pod.length&&pod.every(r=>r.on)?"checked":""} ${pod.length?"":"disabled"} onchange="impSit(${i},${k},this.checked)">${esc(s)} (${rs.length})</label>`}).join("")}</div>
+ <div class="sc" style="max-height:340px;overflow:auto"><table><thead><tr><th></th><th>Nº</th><th>Nome</th><th>RA</th><th>Díg.</th><th>Situação</th><th></th></tr></thead><tbody>${g.rows.map((r,j)=>`<tr><td><input type="checkbox" ${r.on?"checked":""} ${r.ja||r.rep?"disabled":""} onchange="ui.imp[${i}].rows[${j}].on=this.checked;impCnt()"></td><td>${esc(r.num)}</td><td class="nm">${esc(r.nome)}</td><td>${esc(r.ra)}</td><td>${esc(r.dv)}</td><td>${esc(r.sit||"—")}</td><td class="mut">${r.ja?"já cadastrado em "+esc(r.ja):r.rep?"repetido na lista":""}</td></tr>`).join("")}</tbody></table></div></div>`}).join("")}
+ ${G.length?`<div class="row" style="margin-top:10px"><button onclick="impConfirmar()">✅ Cadastrar <span id="ict">${G.reduce((t,g)=>t+g.rows.filter(r=>r.on).length,0)}</span> aluno(s)</button></div>`:""}</section>`}
+function impConfirmar(){const G=ui.imp||[],alvo=[];
+ for(const g of G){if(g.dest==="new"){if(!g.nome.trim())return toast("Informe o nome da sala de "+g.f)}else if(!S.salas.find(s=>s.id===g.dest))return toast("Escolha a sala de destino de "+g.f)}
+ let n=0,pul=0,ult=null;
+ G.forEach(g=>{const sel=g.rows.filter(r=>r.on);if(!sel.length)return;let sa;
+  if(g.dest==="new"){const nome=g.nome.trim();sa=S.salas.find(s=>s.nome===nome);if(!sa){sa={id:uid(),nome,serie:g.serie};S.salas.push(sa)}}else sa=S.salas.find(s=>s.id===g.dest);
+  sel.forEach(r=>{if(S.alunos.some(a=>a.ra===r.ra&&a.dv===r.dv)){pul++;return}S.alunos.push({id:uid(),nome:r.nome,num:r.num,ra:r.ra,dv:r.dv,sala:sa.id});n++});ult=sa.id});
+ if(!n&&!pul)return toast("Nenhum aluno selecionado");
+ save();ui.imp=null;if(ult)ui.sala=ult;render();toast(`${n} aluno(s) cadastrado(s)`+(pul?` — ${pul} já existia(m)`:""))}
+
+/* ---------- IMPORTAR PROVA / GABARITO (PDF, TXT, CSV) ---------- */
+const PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+const MATRX={"Português":"L[ÍI]NGUA PORTUGUESA|PORTUGU[ÊE]S","Matemática":"MATEM[ÁA]TICA","Biologia":"BIOLOGIA","Química":"QU[ÍI]MICA","Física":"F[ÍI]SICA","Geografia":"GEOGRAFIA","História":"HIST[ÓO]RIA","Inglês":"L[ÍI]NGUA INGLESA|INGL[ÊE]S","Educação Financeira":"EDUCA[ÇC][ÃA]O FINANCEIRA"};
+async function pdfLib(){if(window.pdfjsLib)return;
+ await new Promise((ok,no)=>{const s=document.createElement("script");s.src=PDFJS+"pdf.min.js";s.onload=ok;s.onerror=()=>no(new Error("lib"));document.head.appendChild(s)});
+ const w=await(await fetch(PDFJS+"pdf.worker.min.js")).text();pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([w],{type:"text/javascript"}))}
+async function arqTexto(f){if(!/\.pdf$/i.test(f.name))return await f.text();
+ try{await pdfLib()}catch(e){throw new Error("Para ler PDF é preciso estar conectado à internet. Sem internet, cole o texto do gabarito na caixa abaixo.")}
+ const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let out="";
+ for(let p=1;p<=pdf.numPages;p++){const tc=await(await pdf.getPage(p)).getTextContent();let y=null,ln="";
+  tc.items.forEach(it=>{const yy=it.transform[5];if(y!==null&&Math.abs(yy-y)>3){out+=ln.trim()+"\n";ln=""}ln+=it.str+(it.hasEOL?"\n":" ");y=yy});out+=ln.trim()+"\n"}
+ return out}
+function parseProva(t){t=t.replace(/\r/g,"");const pos={};let m;
+ const rx=/QUEST[ÃA]O\s*(?:N[º°.]*\s*)?0*(\d{1,2})\b/gi;
+ while((m=rx.exec(t))){const n=+m[1];if(n>=1&&n<=90&&!(n in pos))pos[n]=m.index}
+ let n=Math.max(0,...Object.keys(pos).map(Number));
+ if(!n){const lr=/^\s*0*(\d{1,2})\s*[.)]\s+\S/gm;let nx=1;while((m=lr.exec(t))){if(+m[1]===nx){pos[nx]=m.index;nx++}}n=nx-1}
+ const hs=[];let off=0;
+ t.split("\n").forEach(l=>{const s=l.trim();if(s&&s.length<=70)for(const mt in MATRX){if(new RegExp("^(?:prova de |componente curricular:? |disciplina:? |[áa]rea:? )?(?:"+MATRX[mt]+")(?:\\s*[-–:(].*)?$","i").test(s)){hs.push([off,mt]);break}}off+=l.length+1});
+ const mats=[];let cur=hs.length?hs[0][1]:"Português";
+ for(let q=1;q<=n;q++){if(q in pos){const h=hs.filter(x=>x[0]<=pos[q]).pop();cur=h?h[1]:(hs.length?hs[0][1]:cur)}mats.push(cur)}
+ const sm=t.match(/(\d)\s*[ªaº°]?\s*s[ée]rie/i)||t.match(/(\d)\s*[ºo°ª]?\s*ano\s+do\s+ensino\s+m[ée]dio/i);
+ const tl=t.split("\n").map(x=>x.trim()).find(x=>x&&x.length<=100&&/simulado/i.test(x));
+ return{n,mats,serie:sm&&SER[sm[1]+"EM"]?sm[1]+"EM":"",titulo:tl||""}}
+function parseGab(t,allowSeq){t=t.replace(/\r/g,"");const map={};
+ t.split("\n").forEach(l=>{const c=l.split(/\t|;|,/).map(x=>x.trim());
+  if(c.length>=2&&/^\d{1,2}$/.test(c[0])&&/^[A-Ea-e]$/.test(c[1])){const q=+c[0];if(q>=1&&q<=90&&!map[q])map[q]={c:c[1].toUpperCase(),m:MAT.includes(c[2])?c[2]:"",d:c[3]||""}}});
+ if(Object.keys(map).length)return map;
+ const gi=t.search(/gabarito/i);let s=(gi>=0?t.slice(gi):t).replace(/quest[ãa]o/gi," ").replace(/\bQ\.?\s*(?=\d)/g," ");
+ const rx=/(^|[^\dA-Za-zÀ-ú])0*(\d{1,2})(?:\s*[-–—.):=]\s*([A-Ea-e])|\s+([A-E]))(?![A-Za-zÀ-ú0-9])/g;let m;
+ while((m=rx.exec(s))){const q=+m[2];if(q>=1&&q<=90&&!map[q])map[q]={c:(m[3]||m[4]).toUpperCase(),m:"",d:""};rx.lastIndex=m.index+m[0].length-1}
+ if(Object.keys(map).length>=3||!allowSeq)return map;
+ const sq=(s.match(/(?:^|\s)(?:[A-E][\s,;.-]*){8,}(?=\s|$)/g)||[]).map(x=>x.replace(/[^A-E]/g,"")).sort((a,b)=>b.length-a.length)[0];
+ if(sq)sq.split("").slice(0,90).forEach((c,i)=>map[i+1]={c,m:"",d:""});
+ return map}
+function aplicaGab(map){const ks=Object.keys(map).map(Number);if(!ks.length)return 0;const mx=Math.min(90,Math.max(...ks));
+ while(draft.gab.length<mx)draft.gab.push(blank());let n=0;
+ ks.forEach(q=>{if(q>draft.gab.length)return;const g=draft.gab[q-1],x=map[q];g.c=x.c;if(x.m&&x.m!==g.m){g.m=x.m;g.d=""}if(x.d)g.d=x.d;n++});return n}
+async function impProva(inp){const f=inp.files[0];inp.value="";if(!f)return;
+ try{toast("Lendo "+f.name+"…");const t=await arqTexto(f),r=parseProva(t);
+  if(!r.n)return toast("Não achei questões numeradas nesse arquivo. Defina o nº de questões e as matérias manualmente.");
+  const old=draft.gab;draft.gab=r.mats.map((m,i)=>({c:(old[i]&&old[i].c)||"",d:"",m}));
+  if(!draft.titulo.trim())draft.titulo=r.titulo||f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ");
+  if(r.serie)draft.serie=r.serie;
+  const li=t.toLowerCase().lastIndexOf("gabarito");let g=0;if(li>=0)g=aplicaGab(parseGab(t.slice(li)));
+  render();toast(`${r.n} questão(ões) lidas`+(g?` e ${g} resposta(s) do gabarito`:". Agora importe o gabarito ou preencha abaixo")+" — confira antes de salvar")}
+ catch(e){toast(e.message||"Não consegui ler o arquivo")}}
+async function impGabArq(inp){const f=inp.files[0];inp.value="";if(!f)return;
+ try{toast("Lendo "+f.name+"…");const n=aplicaGab(parseGab(await arqTexto(f),true));
+  if(!n)return toast("Não consegui identificar as respostas. Cole o texto na caixa abaixo ou use o gabarito rápido.");
+  render();const f2=draft.gab.filter(g=>!g.c).length;toast(`${n} resposta(s) importada(s)`+(f2?` — ${f2} questão(ões) ainda sem gabarito`:" — confira e salve"))}
+ catch(e){toast(e.message||"Não consegui ler o arquivo")}}
+function impGab(){const n=aplicaGab(parseGab($("#gcola").value,true));render();toast(n?n+" questão(ões) importada(s)":"Nada reconhecido. Use o formato: 1-A, 2-B… ou Questão;Letra;Matéria;Descritor")}
+function salvarSim(){const d=draft;if(!d.titulo.trim())return toast("Informe o título");const ms=[...new Set(d.gab.map(g=>g.m))];
+ const o={id:d.id||uid(),titulo:d.titulo.trim(),serie:d.serie,materia:ms.length>1?"Várias matérias":ms[0],data:d.data,gab:d.gab.map(g=>({c:g.c,d:g.d,m:g.m}))};
+ const i=S.simulados.findIndex(s=>s.id===o.id);i<0?S.simulados.push(o):S.simulados[i]=o;ui.nsim=o.id;save();draft=null;render();const p=o.gab.filter(g=>!g.c).length;toast(p?`Salvo — falta o gabarito de ${p} questão(ões)`:"Simulado salvo")}
+function editSim(id){const s=S.simulados.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(s));draft.gab.forEach(g=>g.m=g.m||s.materia);render();scrollTo(0,0)}
+function delSim(id){S.simulados=S.simulados.filter(s=>s.id!==id);delete S.resp[id];save();render()}
+function expSim(id){const s=S.simulados.find(x=>x.id===id),desc={};s.gab.forEach(g=>{const m=mq(s,g);if(dl(m).length)desc[m]=dl(m)});salvarArq(s.titulo+".json",JSON.stringify({titulo:s.titulo,serie:s.serie,materia:s.materia,data:s.data,gab:s.gab.map(g=>({c:g.c,d:g.d,m:mq(s,g)})),desc}))}
+function importarSim(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),lista=o.simulados||[o];
+ lista.forEach(s=>{if(!s.titulo||!SER[s.serie]||!Array.isArray(s.gab)||!s.gab.length)throw 0});
+ lista.forEach(s=>S.simulados.push({id:uid(),titulo:s.titulo,serie:s.serie,materia:s.materia||"Várias matérias",data:s.data||"",gab:s.gab.map(g=>({c:/^[A-E]$/.test(g.c)?g.c:"",d:g.d||"",m:MAT.includes(g.m)?g.m:"Português"}))}));
+ const ds=o.desc||{};Object.keys(ds).forEach(m=>{S.desc[m]=S.desc[m]||[];ds[m].forEach(x=>{if(!S.desc[m].some(y=>y[0]===x[0]))S.desc[m].push(x)})});
+ save();render();toast(lista.length+" simulado(s) importado(s)")}catch(e){toast("Arquivo de simulado inválido")}};r.readAsText(f);inp.value=""}
+/* descritores: nenhuma lista fictícia — a escola cadastra os oficiais */
+function vDesc(){const m=ui.dm||MAT[0];ui.dm=m;
+ return `<section class="card"><h2>Descritores / habilidades</h2><p class="mut" style="margin:0 0 6px">Cadastre os descritores oficiais por matéria (nada vem pré-preenchido, exceto Educação Financeira).</p>
+ <div class="row"><select onchange="ui.dm=this.value;render()">${matOpts(m)}</select><input id="d_c" placeholder="Código (ex.: D01)" style="width:130px"><input id="d_t" placeholder="Descrição" style="flex:1"><button onclick="addDesc()">+ Adicionar</button></div>
+ <details><summary class="mut" style="cursor:pointer">Importar vários (Código ⇥ Descrição)</summary><textarea id="d_cola"></textarea><div class="row"><button class="ghost" onclick="colarDesc()">Importar descritores colados</button></div></details>
+ ${dl(m).map(([c,t],i)=>`<div class="row" style="border-top:1px solid var(--line);padding-top:6px"><b>${esc(c)}</b><span style="flex:1">${esc(t)}</span><button class="red sm" onclick="delDesc(${i})">Remover</button></div>`).join("")||`<p class="mut">Nenhum descritor de ${m} cadastrado.</p>`}</section>`}
+function addDesc(){const c=$("#d_c").value.trim(),t=$("#d_t").value.trim();if(!c||!t)return toast("Informe código e descrição");S.desc[ui.dm]=dl(ui.dm).filter(x=>x[0]!==c).concat([[c,t]]);save();render()}
+function colarDesc(){let n=0;$("#d_cola").value.split("\n").forEach(l=>{const c=l.split(/\t|;/).map(x=>x.trim());if(c[0]&&c[1]){S.desc[ui.dm]=dl(ui.dm).filter(x=>x[0]!==c[0]).concat([[c[0],c[1]]]);n++}});save();render();toast(n+" descritor(es) importado(s)")}
+function delDesc(i){S.desc[ui.dm].splice(i,1);save();render()}
+
+/* ---------- LANÇAR NOTAS ---------- */
+const curSim=()=>S.simulados.find(s=>s.id===ui.nsim),cls=(v,c)=>!v||!c?"":v===c?"ok":"bad";
+function calc(sim,aid){const r=(S.resp[sim.id]||{})[aid]||[];const tem=r.some(Boolean);const ac=tem?sim.gab.filter((g,i)=>g.c&&r[i]===g.c).length:0;return{r,tem,ac,er:tem?sim.gab.length-ac:0}}
+const tot=(sim,c)=>pend(sim)?(c.tem?"•":""):c.tem?`${c.ac}/${sim.gab.length}`:"";
+function vNotas(){if(!S.simulados.length)return `<section class="card mut">Cadastre ou importe um simulado primeiro.</section>`;
+ const sim=curSim()||S.simulados[0];ui.nsim=sim.id;const sl=salasOrd().filter(s=>s.serie===sim.serie);if(!sl.find(s=>s.id===ui.nsala))ui.nsala=sl[0]&&sl[0].id;
+ const al=ui.nsala?alunosDe(ui.nsala):[],gr=[];sim.gab.forEach(g=>{const m=mq(sim,g),l=gr[gr.length-1];l&&l[0]===m?l[1]++:gr.push([m,1])});
+ return `<section class="card"><div class="row"><select style="flex:1" onchange="ui.nsim=this.value;render()">${opts(S.simulados.map(s=>[s.id,`${s.titulo} · ${SER[s.serie]}`]),sim.id)}</select></div>
+ ${pend(sim)?`<div class="warn">Gabarito pendente em ${sim.gab.filter(g=>!g.c).length} questão(ões). Você já pode lançar as respostas dos alunos; a correção (verde/vermelho e total) aparece quando o gabarito for preenchido em “Cadastrar simulado → Editar / gabarito”.</div>`:""}
+ <p class="mut" style="margin:4px 0">Digite A–E em cada célula (avança sozinho; setas, Enter e Backspace navegam). Salva automaticamente.</p></section>
+ ${!sl.length?`<section class="card mut">Não há salas de ${SER[sim.serie]}. Crie na aba de alunos.</section>`:`<div class="tabs">${sl.map(s=>`<button class="tab ${s.id===ui.nsala?"on":""}" onclick="ui.nsala='${s.id}';render()">${esc(s.nome)}</button>`).join("")}</div>
+ <div class="sc" style="max-height:70vh"><table class="sheet"><thead><tr class="gh"><th colspan="3"></th>${gr.map(x=>`<th colspan="${x[1]}">${esc(x[0])}</th>`).join("")}<th></th></tr><tr><th>Nº</th><th>Nome</th><th>RA-Díg.</th>${sim.gab.map((g,i)=>`<th>${i+1}</th>`).join("")}<th>Acertos</th></tr>
+ <tr class="gab"><td colspan="3" style="text-align:right">Gabarito</td>${sim.gab.map(g=>`<td>${g.c||"?"}</td>`).join("")}<td></td></tr></thead>
+ <tbody>${al.map(a=>{const c=calc(sim,a.id);return `<tr><td>${esc(a.num)}</td><td class="nm">${esc(a.nome)}</td><td>${esc(a.ra)}-${esc(a.dv)}</td>${sim.gab.map((g,i)=>{const v=c.r[i]||"";return `<td><input class="c ${cls(v,g.c)}" maxlength="1" data-a="${a.id}" data-q="${i}" value="${v}" oninput="cell(this)" onkeydown="key(event,this)" autocomplete="off"></td>`}).join("")}<td class="tot" id="t-${a.id}">${tot(sim,c)}</td></tr>`}).join("")}</tbody>
+ <tfoot><tr><td colspan="3" style="text-align:right">% de acerto</td>${sim.gab.map((g,i)=>`<td id="f-${i}"></td>`).join("")}<td></td></tr></tfoot></table></div>`}`}
+function cell(el){const sim=curSim(),aid=el.dataset.a,i=+el.dataset.q;const v=el.value.toUpperCase();if(v&&!/^[A-E]$/.test(v)){el.value="";return}el.value=v;
+ const R=(S.resp[sim.id]=S.resp[sim.id]||{});const r=(R[aid]=R[aid]||[]);r[i]=v;if(!r.some(Boolean))delete R[aid];save();
+ el.className="c "+cls(v,sim.gab[i].c);$("#t-"+aid).textContent=tot(sim,calc(sim,aid));footer();
+ if(v){const n=el.parentElement.nextElementSibling.querySelector("input");if(n){n.focus();n.select()}}}
+function key(e,el){const td=el.parentElement;let t=null;
+ if(e.key==="ArrowRight")t=td.nextElementSibling;else if(e.key==="ArrowLeft"||(e.key==="Backspace"&&!el.value))t=td.previousElementSibling;
+ else if(e.key==="ArrowDown"||e.key==="Enter"){const tr=td.parentElement.nextElementSibling;t=tr&&tr.children[td.cellIndex]}
+ else if(e.key==="ArrowUp"){const tr=td.parentElement.previousElementSibling;t=tr&&tr.children[td.cellIndex]}
+ const n=t&&t.querySelector&&t.querySelector("input");if(n){e.preventDefault();n.focus();n.select()}}
+function footer(){const sim=curSim();if(!sim)return;const cs=alunosDe(ui.nsala).map(a=>calc(sim,a.id)).filter(c=>c.tem);
+ sim.gab.forEach((g,i)=>{const e=document.getElementById("f-"+i);if(e)e.textContent=cs.length&&g.c?Math.round(cs.filter(c=>c.r[i]===g.c).length/cs.length*100):"–"})}
+
+/* ---------- RESULTADOS ---------- */
+function stats(sim,sid){const sl=visSalas().filter(s=>s.serie===sim.serie&&(!sid||s.id===sid));const al=sl.flatMap(s=>alunosDe(s.id));
+ const part=al.map(a=>Object.assign({a,s:sl.find(x=>x.id===a.sala)},calc(sim,a.id))).filter(x=>x.tem);
+ const errQ=sim.gab.map((g,i)=>part.filter(p=>p.r[i]!==g.c).length),nq={},ed={},bym={};
+ sim.gab.forEach((g,i)=>{const m=mq(sim,g),k=m+"|"+(g.d||"");nq[k]=(nq[k]||0)+1;ed[k]=(ed[k]||0)+errQ[i];const b=bym[m]=bym[m]||{h:0,t:0};b.t+=part.length;b.h+=part.length-errQ[i]});
+ const desc=Object.keys(ed).map(k=>{const[m,d]=k.split("|");return{m,d,e:ed[k],p:part.length?ed[k]/(part.length*nq[k])*100:0}}).sort((a,b)=>b.p-a.p);
+ return{al,part,errQ,desc,bym,sl}}
+const bars=rows=>rows.length?rows.map(r=>`<div class="bar"><span title="${esc(r[0])}">${esc(r[0])}</span><i style="width:${Math.max(2,r[1])*0.5}%"></i><span>${Math.round(r[1])}%</span></div>`).join(""):`<p class="mut">Sem dados.</p>`;
+const dname=(m,d)=>{if(!d)return m+" · sem descritor";const f=dl(m).find(x=>x[0]===d);return `${m} · ${d}${f?" · "+f[1]:""}`};
+function vRes(){const lista=S.simulados.filter(s=>visSalas().some(x=>x.serie===s.serie));
+ if(!lista.length)return `<section class="card mut">${isC()?"Cadastre ou importe um simulado primeiro.":"Nenhum simulado disponível para as suas salas."}</section>`;
+ const sim=lista.find(s=>s.id===ui.rsim)||lista[0];ui.rsim=sim.id;const sl=visSalas().filter(s=>s.serie===sim.serie);if(ui.rsala&&!sl.find(s=>s.id===ui.rsala))ui.rsala="";
+ const head=`<section class="card"><div class="row"><select style="flex:1" onchange="ui.rsim=this.value;render()">${opts(lista.map(s=>[s.id,`${s.titulo} · ${SER[s.serie]}`]),sim.id)}</select>
+ <select onchange="ui.rsala=this.value;render()"><option value="">${isC()?"Todas as salas":"Minhas salas"}</option>${opts(sl.map(s=>[s.id,s.nome]),ui.rsala)}</select>${isC()?`<button onclick="exportar()">⬇ Exportar Excel</button>`:""}</div></section>`;
+ if(pend(sim))return head+`<div class="warn">Este simulado está com o gabarito incompleto (${sim.gab.filter(g=>!g.c).length} questão(ões) sem resposta correta). Complete em “Cadastrar simulado → Editar / gabarito” para ver os resultados.</div>`;
+ const st=stats(sim,ui.rsala),n=st.part.length,med=n?st.part.reduce((t,p)=>t+p.ac,0)/n:0;
+ return head+`<div class="cards"><div class="kpi">Média de acertos<b>${med.toFixed(1)}<small class="mut"> / ${sim.gab.length}</small></b></div><div class="kpi">Participação<b>${st.al.length?Math.round(n/st.al.length*100):0}%</b><span class="mut">${n} de ${st.al.length} alunos</span></div>
+ <div class="kpi">Aproveitamento<b>${n?Math.round(med/sim.gab.length*100):0}%</b></div></div>
+ <div class="two"><section class="card"><h2>% de acerto por matéria</h2>${bars(Object.keys(st.bym).map(m=>[m,st.bym[m].t?st.bym[m].h/st.bym[m].t*100:0]))}</section>
+ <section class="card"><h2>Descritores mais errados (% de erro)</h2>${bars(st.desc.slice(0,10).map(d=>[dname(d.m,d.d),d.p]))}</section>
+ <section class="card"><h2>Questões mais erradas (% de erro)</h2>${bars(st.errQ.map((e,i)=>["Q"+(i+1)+" · "+mq(sim,sim.gab[i])+(sim.gab[i].d?" · "+sim.gab[i].d:""),n?e/n*100:0]).sort((a,b)=>b[1]-a[1]).slice(0,10))}</section></div>
+ <section class="card"><h2>Ranking de alunos</h2><div class="sc"><table><thead><tr><th>Nº</th><th>Nome</th><th>Sala</th><th>Acertos</th><th>Erros</th><th>%</th></tr></thead><tbody>${[...st.part].sort((a,b)=>b.ac-a.ac).map(p=>`<tr><td>${esc(p.a.num)}</td><td class="nm">${esc(p.a.nome)}</td><td>${esc(p.s&&p.s.nome)}</td><td>${p.ac}</td><td>${p.er}</td><td>${Math.round(p.ac/sim.gab.length*100)}%</td></tr>`).join("")||`<tr><td colspan="6" class="mut">Nenhuma nota lançada ainda.</td></tr>`}</tbody></table></div></section>`}
+
+/* ---------- EXPORTAR / BACKUP ---------- */
+async function salvarArq(nome,data){nome=nome.replace(/[\\/:*?"<>|]/g,"-");const d=window.claude&&claude.use?await claude.use("downloads"):null;
+ if(d){try{await d.save({filename:nome,data});toast("Arquivo pronto")}catch(e){if(!e||e.code!=="declined")toast("Não foi possível baixar")}return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));a.download=nome;document.body.appendChild(a);a.click();a.remove();toast("Arquivo gerado")}
+async function exportar(){const sim=S.simulados.find(s=>s.id===ui.rsim);if(!sim||pend(sim))return;if(!window.XLSX)return toast("Biblioteca Excel não carregou (precisa de internet)");
+ const wb=XLSX.utils.book_new(),all=stats(sim,"");
+ all.sl.forEach(s=>{const rows=alunosDe(s.id).map(a=>({a,c:calc(sim,a.id)})).filter(x=>x.c.tem).map(({a,c})=>Object.assign({Nome:a.nome,"Nº Chamada":a.num,RA:a.ra,"Dígito RA":a.dv,Sala:s.nome},...sim.gab.map((g,i)=>({["Q"+(i+1)]:c.r[i]||""})),{Acertos:c.ac,Erros:c.er}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Aviso:"Sem notas lançadas"}]),s.nome.slice(0,31))});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(all.desc.map(d=>({"Matéria":d.m,"Descritor":d.d||"—","Descrição":(dl(d.m).find(x=>x[0]===d.d)||[])[1]||"","Erros":d.e,"% de erro":Math.round(d.p)}))),"Descritores");
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(Object.keys(all.bym).map(m=>({"Matéria":m,"% de acerto":all.bym[m].t?Math.round(all.bym[m].h/all.bym[m].t*100):0}))),"Matérias");
+ salvarArq(sim.titulo+".xlsx",XLSX.write(wb,{type:"array",bookType:"xlsx"}))}
+function backup(){salvarArq("backup-simulados.json",JSON.stringify(S))}
+function restaurar(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.salas)||!Array.isArray(o.alunos)||!Array.isArray(o.simulados))throw 0;
+ S=Object.assign({resp:{},users:[],desc:{}},o,{seeded:true});save();draft=null;sess.u=null;persist();render();toast("Backup restaurado")}catch(e){toast("Arquivo de backup inválido")}};r.readAsText(f);inp.value=""}
+render();
+</script>
+</body>
+</html>
